@@ -11,6 +11,11 @@ body {
   font-family: inherit;
   line-height: inherit;
   margin: 0;
+  background-color: #1d1d1d;
+
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 h1,
 h2,
@@ -407,3 +412,201 @@ summary svg {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+
+
+
+
+
+.navbar {
+  background-color: #333;
+  padding: 10px 20px;
+}
+.navbar-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+.navbar-item {
+  display: inline-block;
+  margin-right: 20px;
+  vertical-align: middle;
+  padding: 8px 8px;
+}
+.navbar-link {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+}
+.navbar-link:hover {
+  color: #ccc;
+}
+.align-right {
+  float: right;
+  margin: 0 auto;
+  padding: 10px 8px;
+}
+
+
+.footer {
+  background-color: #333;
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  margin-top: auto;
+}
+.footer-content {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+
+.main-search {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin: 0 auto;
+  vertical-align: middle;
+  height: 80vh;
+}
+.main-search input {
+  padding: 10px;
+  font-size: 16px;
+  width: 300px;
+}
+.main-search button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: green;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.main-search button:hover {
+  background-color: grey;
+}
+
+
+.search {
+  text-align: center;
+  margin: 0 auto;
+  padding: 10px;
+}
+.search input {
+  padding: 10px;
+  font-size: 16px;
+  width: 300px;
+}
+.search button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: green;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.search button:hover {
+  background-color: grey;
+}
+
+
+.search-item {
+  display: flex;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  overflow: hidden;
+  max-width: 80%;
+  margin: 0 auto;
+  margin-bottom: 20px;
+  color:#ccc;
+}
+.search-item Image {
+  object-fit: cover;
+}
+.search-tem-details {
+  padding: 10px;
+}
+.search-item-name {
+  margin-top: 0;
+}
+.search-item-price {
+  margin-bottom: 0;
+}
+
+
+.item-detail-page {
+  display: flex;
+}
+.item-images {
+  flex: 1;
+}
+.item-image {
+  width: 100%;
+  height: auto;
+}
+.item-details {
+  flex: 1;
+  padding: 20px;
+}
+.item-name {
+  margin-top: 0;
+}
+.item-description {
+  margin-bottom: 20px;
+}
+.item-price {
+  font-size: 18px;
+  font-weight: bold;
+}
+.item-tags {
+  margin-top: 10px;
+}
+.tag {
+  display: inline-block;
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: #fff;
+  border-radius: 5px;
+  margin-right: 5px;
+}
+
+
+.auth-form {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+}
+.auth-form div {
+  margin-bottom: 20px;
+}
+.auth-form label {
+  display: block;
+  margin-bottom: 5px;
+}
+.auth-form input[type="text"], input[type="email"], input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+.auth-form button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.auth-form button:hover {
+  background-color: #0056b3;
+}
+
