@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import AddItemPage from './../../../components/add-item';
+import OrderForm from './../../../components/order';
 
 const App: React.FC = () => {
   const handleSubmit = (formData: FormData) => {
@@ -10,7 +10,7 @@ const App: React.FC = () => {
 
   return (
     <div>
-      <AddItemPage onSubmit={handleSubmit} />
+      <OrderForm onSubmit={handleSubmit} />
     </div>
   );
 };

@@ -580,7 +580,11 @@ summary svg {
   padding: 20px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  background-color: #fff;
+  background-color: #cfcfcf;
+}
+.auth-form h2{
+  margin-bottom: 20px;
+  font-weight: bold;
 }
 .auth-form div {
   margin-bottom: 20px;
@@ -589,7 +593,7 @@ summary svg {
   display: block;
   margin-bottom: 5px;
 }
-.auth-form input[type="text"], input[type="email"], input[type="password"] {
+.auth-form input[type="text"], input[type="email"], input[type="password"], input[type="number"], textarea {
   width: 100%;
   padding: 10px;
   font-size: 16px;
@@ -605,6 +609,7 @@ summary svg {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
+  margin-top: 20px;
 }
 .auth-form button:hover {
   background-color: #0056b3;
