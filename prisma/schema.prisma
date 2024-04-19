@@ -8,28 +8,35 @@ generator client {
 }
 
 model User {
-  id             Int           @id @default(autoincrement())
-  email          String        @unique
-  passwordHash   String
-  organization   Organization?
-  organizationId Int
-  Order          Order[]
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  Order        Order[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model OrganizationUser {
+  id           Int           @id @default(autoincrement())
+  email        String        @unique
+  passwordHash String
+  organization Organization?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 model Organization {
-  id        Int        @id @default(autoincrement())
+  id        Int              @id @default(autoincrement())
   items     ShopItem[]
-  owner     User       @relation(fields: [ownerId], references: [id])
-  ownerId   Int        @unique
+  owner     OrganizationUser @relation(fields: [ownerId], references: [id])
+  ownerId   Int              @unique
   logo      String
   name      String
   vat       String
   address   String
   phone     String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
 }
 
 model ShopItem {

@@ -5,6 +5,7 @@
   "scripts": {},
   "private": true,
   "dependencies": {
+    "@clerk/nextjs": "^4.29.12",
     "@nx/next": "17.2.8",
     "next": "13.4.4",
     "prisma": "^5.8.1",
