@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import './../app/global.css';
+
 
 interface RegistrationPageProps {
   onRegister: (email: string, password: string) => void;

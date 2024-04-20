@@ -1,5 +1,4 @@
 import React from 'react';
-import './../../app/global.css';
 
 interface FooterProps {
   companyName: string;
@@ -7,8 +6,8 @@ interface FooterProps {
 
 const Footer: React.FC<FooterProps> = ({ companyName }) => {
   return (
-    <footer className="footer">
-      <div className="footer-content">
+    <footer className="bg-gray-800 p-5">
+      <div className="text-center">
         <p>&copy; {companyName} {new Date().getFullYear()}</p>
       </div>
     </footer>

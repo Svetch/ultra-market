@@ -1,5 +1,5 @@
 import React from 'react';
-import './../app/global.css';
+
 
 
 const MainPage: React.FC = () => {

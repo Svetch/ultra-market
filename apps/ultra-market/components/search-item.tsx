@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import './../app/global.css';
+
 
 interface SearchItemProps {
   itemName: string;

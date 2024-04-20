@@ -1,0 +1,15 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "default",
+  "rsc": false,
+  "tailwind": {
+    "config": "ui-utils/tailwind.config.js",
+    "css": "ui-utils/global.scss",
+    "baseColor": "neutral",
+    "cssVariables": true
+  },
+  "aliases": {
+    "components": "@ultra-market",
+    "utils": "@ultra-market/ui-utils"
+  }
+}

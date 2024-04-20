@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import './../app/global.css';
+
 
 interface LoginPageProps {
   onLogin: (email: string, password: string) => void;

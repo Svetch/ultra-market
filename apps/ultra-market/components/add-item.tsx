@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import './../app/global.css';
 
 interface AddItemPageProps {
   onSubmit: (formData: FormData) => void;

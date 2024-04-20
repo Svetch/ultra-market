@@ -1,3 +1,5 @@
+@import "../../../ui-utils/src/global.scss";
+
 html {
   -webkit-text-size-adjust: 100%;
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
@@ -413,11 +415,6 @@ summary svg {
   }
 }
 
-
-
-
-
-
 .navbar {
   background-color: #333;
   padding: 10px 20px;
@@ -447,7 +444,6 @@ summary svg {
   padding: 10px 8px;
 }
 
-
 .footer {
   background-color: #333;
   color: #fff;
@@ -459,7 +455,6 @@ summary svg {
   max-width: 960px;
   margin: 0 auto;
 }
-
 
 .main-search {
   display: flex;
@@ -488,7 +483,6 @@ summary svg {
   background-color: grey;
 }
 
-
 .search {
   text-align: center;
   margin: 0 auto;
@@ -512,7 +506,6 @@ summary svg {
   background-color: grey;
 }
 
-
 .search-item {
   display: flex;
   border: 1px solid #ddd;
@@ -521,7 +514,7 @@ summary svg {
   max-width: 80%;
   margin: 0 auto;
   margin-bottom: 20px;
-  color:#ccc;
+  color: #ccc;
 }
 .search-item Image {
   object-fit: cover;
@@ -535,7 +528,6 @@ summary svg {
 .search-item-price {
   margin-bottom: 0;
 }
-
 
 .item-detail-page {
   display: flex;
@@ -573,7 +565,6 @@ summary svg {
   margin-right: 5px;
 }
 
-
 .auth-form {
   max-width: 400px;
   margin: 50px auto;
@@ -582,7 +573,7 @@ summary svg {
   border-radius: 5px;
   background-color: #cfcfcf;
 }
-.auth-form h2{
+.auth-form h2 {
   margin-bottom: 20px;
   font-weight: bold;
 }
@@ -593,7 +584,11 @@ summary svg {
   display: block;
   margin-bottom: 5px;
 }
-.auth-form input[type="text"], input[type="email"], input[type="password"], input[type="number"], textarea {
+.auth-form input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='number'],
+textarea {
   width: 100%;
   padding: 10px;
   font-size: 16px;
@@ -614,4 +609,3 @@ summary svg {
 .auth-form button:hover {
   background-color: #0056b3;
 }
-
