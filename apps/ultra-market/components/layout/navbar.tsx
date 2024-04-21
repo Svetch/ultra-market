@@ -19,38 +19,19 @@ import {
 } from "@ultra-market/ui/command";
 import {Menu, Search} from "lucide-react";
 
-/*
 interface NavItem {
   children?: React.ReactNode;
   href: string;
   alignRight?: boolean;
 }
-*/
 
 interface NavbarProps {
+  items: NavItem[];
   logo: StaticImageData;
 }
 
-
-
-const Navbar: React.FC<NavbarProps> = ({logo}) => {
+const Navbar: React.FC<NavbarProps> = ({items, logo}) => {
   const [openSearch, setOpenSearch] = useState(false);
-
-  /*
-  const notSignedInLinks = [
-    { href: '/about', label: 'Rólunk' },
-    { href: '/contact', label: 'Elérhetőség' },
-  ];
-  */
-  
-  const signedInLinks = [
-    { href: '/about', label: 'Rólunk' },
-    { href: '/contact', label: 'Elérhetőség' },
-    { href: '/all-items', label: 'Árucikkeim' },
-  ];
-
-  //const links = isSignedIn ? signedInLinks : notSignedInLinks;
-
   return (
     <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
       <nav
@@ -61,13 +42,13 @@ const Navbar: React.FC<NavbarProps> = ({logo}) => {
         >
           <Image src={logo} alt="logo" width={250} height={40}/>
         </Link>
-        {signedInLinks.map((link, index) => (
+        {items.map((item, index) => (
           <Link
-            href={link.href}
+            href={item.href}
             key={index}
             className="text-muted-foreground transition-colors hover:text-foreground"
           >
-            {link.label}
+            {item.children}
           </Link>
         ))}
       </nav>
@@ -90,13 +71,13 @@ const Navbar: React.FC<NavbarProps> = ({logo}) => {
             >
               <Image src={logo} alt="logo" width={250} height={40}/>
             </Link>
-            {signedInLinks.map((link, index) => (
+            {items.map((item, index) => (
               <Link
-                href={link.href}
+                href="#"
                 key={index}
                 className="text-muted-foreground hover:text-foreground"
               >
-                {link.label}
+                {item.children}
               </Link>
             ))}
           </nav>
