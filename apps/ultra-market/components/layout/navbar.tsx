@@ -19,11 +19,13 @@ import {
 } from "@ultra-market/ui/command";
 import {Menu, Search} from "lucide-react";
 
+/*
 interface NavItem {
   children?: React.ReactNode;
   href: string;
   alignRight?: boolean;
 }
+*/
 
 interface NavbarProps {
   logo: StaticImageData;
@@ -34,10 +36,12 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({logo}) => {
   const [openSearch, setOpenSearch] = useState(false);
 
+  /*
   const notSignedInLinks = [
     { href: '/about', label: 'Rólunk' },
     { href: '/contact', label: 'Elérhetőség' },
   ];
+  */
   
   const signedInLinks = [
     { href: '/about', label: 'Rólunk' },
