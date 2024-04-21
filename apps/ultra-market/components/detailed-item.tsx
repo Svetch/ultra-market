@@ -1,13 +1,11 @@
 import React from 'react';
-import Image from 'next/image';
-
+import Link from 'next/link';
 
 
 interface ItemDetail {
   name: string;
   description: string;
   price: number;
-  images: string[];
   tags: string[];
 }
 
@@ -16,50 +14,33 @@ interface ItemDetailPageProps {
 }
 
 const ItemDetailPage: React.FC<ItemDetailPageProps> = ({ item }) => {
+  const formatter = new Intl.NumberFormat('hu-HU');
+
   return (
     <div className="item-detail-page">
-      <div className="item-images">
-        {item.images.map((image, index) => (
-          <Image key={index} src={image} width={300} height={300} alt={`Image ${index + 1}`} className="item-image" />
-          //<img key={index} src={image} alt={`Image ${index + 1}`} className="item-image" />
-        ))}
-      </div>
       <div className="item-details">
-        <h1 className="item-name">{item.name}</h1>
+        <h1 className="item-name text-xl mb-[20px] font-bold">{item.name}</h1>
         <p className="item-description">{item.description}</p>
-        <p className="item-price">${item.price.toFixed(2)}</p>
-        <div className="item-tags">
+
+        <div className="flex items-center space-x-4">
+          <p className="item-price">{formatter.format(item.price)} Ft</p>
+          <button /*onClick={goToPrevious}*/ className="bg-blue-500 hover:bg-slate-800 transition duration-300 text-white p-2 rounded-md mr-2" >
+            Megrendelés
+          </button>
+        </div>
+        
+        
+        <div className="pt-10">
           {item.tags.map((tag, index) => (
-            <span key={index} className="tag">{tag}</span>
+            <Link key={index} href={`/search?q=${encodeURIComponent(tag)}`} >
+              <span className="tag">{tag}</span>
+            </Link>
           ))}
         </div>
       </div>
     </div>
   );
 };
-
-
-/*
-interface ItemDetailPageProps {
-  itemName: string;
-  price: number;
-  description: string;
-  imageUrl: string;
-}
-
-const ItemDetailPage: React.FC<ItemDetailPageProps> = ({ itemName, price, description, imageUrl }) => {
-  return (
-    <div className="item">
-        <Image src={imageUrl} width={300} height={300} alt={itemName} />
-        <div className="item-details">
-            <h2 className="item-name">{itemName}</h2>
-            <p className="item-price">{price.toFixed(2)} Ft</p>
-            <p className="item-description">{description}</p>
-        </div>
-    </div>
-  );
-};
-*/
 
 
 export default ItemDetailPage;

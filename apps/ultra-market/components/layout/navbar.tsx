@@ -26,12 +26,27 @@ interface NavItem {
 }
 
 interface NavbarProps {
-  items: NavItem[];
   logo: StaticImageData;
 }
 
-const Navbar: React.FC<NavbarProps> = ({items, logo}) => {
+
+
+const Navbar: React.FC<NavbarProps> = ({logo}) => {
   const [openSearch, setOpenSearch] = useState(false);
+
+  const notSignedInLinks = [
+    { href: '/about', label: 'Rólunk' },
+    { href: '/contact', label: 'Elérhetőség' },
+  ];
+  
+  const signedInLinks = [
+    { href: '/about', label: 'Rólunk' },
+    { href: '/contact', label: 'Elérhetőség' },
+    { href: '/all-items', label: 'Árucikkeim' },
+  ];
+
+  //const links = isSignedIn ? signedInLinks : notSignedInLinks;
+
   return (
     <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
       <nav
@@ -42,13 +57,13 @@ const Navbar: React.FC<NavbarProps> = ({items, logo}) => {
         >
           <Image src={logo} alt="logo" width={250} height={40}/>
         </Link>
-        {items.map((item, index) => (
+        {signedInLinks.map((link, index) => (
           <Link
-            href={item.href}
+            href={link.href}
             key={index}
             className="text-muted-foreground transition-colors hover:text-foreground"
           >
-            {item.children}
+            {link.label}
           </Link>
         ))}
       </nav>
@@ -71,13 +86,13 @@ const Navbar: React.FC<NavbarProps> = ({items, logo}) => {
             >
               <Image src={logo} alt="logo" width={250} height={40}/>
             </Link>
-            {items.map((item, index) => (
+            {signedInLinks.map((link, index) => (
               <Link
-                href="#"
+                href={link.href}
                 key={index}
                 className="text-muted-foreground hover:text-foreground"
               >
-                {item.children}
+                {link.label}
               </Link>
             ))}
           </nav>
