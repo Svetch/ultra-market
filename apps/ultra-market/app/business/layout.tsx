@@ -6,8 +6,7 @@ export const runtime = "edge";
 
 export default function Layout({children}: { children: React.ReactNode }) {
   const navItems = [
-    {children: 'About', href: '/about'},
-    {children: 'Contact', href: '/contact'},
+    {children: 'Árucikkeim', href: '/business/all-items'},
   ];
   return (
     <div className="grid grid-rows-[auto,1fr,auto] min-h-screen w-full">
