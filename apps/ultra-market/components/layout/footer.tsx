@@ -1,8 +1,6 @@
 import Link from 'next/link';
 import React from 'react';
 import {
-  ClerkProvider,
-  RedirectToSignIn,
   SignedIn,
 } from "@clerk/nextjs";
 

@@ -1,21 +1,41 @@
+"use client";
 import React from 'react';
-import ItemDetailPage from './../../../components/detailed-item';
+import EditableProductPage from './../../../components/edit-item';
 
-const ItemDetailExample: React.FC = () => {
-  const item = {
-    name: 'Example Item',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam vel justo sit amet est iaculis viverra.',
-    price: 29.99,
-    images: ['/../public/logo.png', '/../public/logo.png', '/../public/logo.png'],
-    tags: ['Tag1', 'Tag2', 'Tag3'],
-  };
+interface Product {
+    images: string[];
+    title: string;
+    description: string;
+    tags: string[];
+    price: number;
+    stock: number;
+}
 
-  return (
-    <div>
-        
-        <ItemDetailPage item={item} />
-    </div>
-  );
+const ParentComponent: React.FC = () => {
+    const mockProduct = {
+        images: [
+            "/watch_black.jpg",
+            "/watch_grey.jpg",
+        ],
+        title: "Sample Product",
+        description: "This is a sample product description.",
+        tags: ["tag1", "tag2"],
+        price: 4999,
+        stock: 10,
+    };
+
+
+    const handleSave = (updatedProduct: Product) => {
+        console.log('Product has been saved:', updatedProduct);
+    };
+
+    return (
+        <div className="container mx-auto bg-neutral-800 rounded-lg p-5 m-10">
+            <h1 className="text-3xl font-bold mb-4 text-white">Áru szerkesztése</h1>
+
+            <EditableProductPage product={mockProduct} onSave={handleSave} />
+        </div>
+    );
 };
 
-export default ItemDetailExample;
+export default ParentComponent;
