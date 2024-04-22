@@ -1,8 +1,8 @@
-import { PrismaClient } from '@prisma/client';
-import { Pool } from '@prisma/pg-worker'
-import { PrismaPg } from '@prisma/adapter-pg-worker'
+import { PrismaClient } from '@prisma/client/';
+import { PrismaNeon } from '@prisma/adapter-neon';
+import { Pool } from '@neondatabase/serverless';
 
-const pool = new Pool({ connectionString: process.env.POSTGRES_PRISMA_URL });
-const adapter = new PrismaPg(pool);
+const neon = new Pool({ connectionString: process.env.POSTGRES_PRISMA_URL });
+const adapter = new PrismaNeon(neon);
 
 export const db = new PrismaClient({ adapter });
