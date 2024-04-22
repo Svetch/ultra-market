@@ -1,6 +1,9 @@
 'use server';
+import { cookies } from 'next/headers';
 import { db } from './db';
 export async function search(q: string) {
+  const _cookies = cookies();
+
   console.log("q",q);
   return db.shopItem.findMany({
     where: {
