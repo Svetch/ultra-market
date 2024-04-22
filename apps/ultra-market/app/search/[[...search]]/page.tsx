@@ -21,12 +21,16 @@ const fetcher = (input: RequestInfo | URL, init?: RequestInit | undefined) =>
   fetch(input, init).then((res) => res.json());
 
 export default function Index({ params }: { params: { search: string[] } }) {
-  const [search, setSearch] = useState(params.search?.[0] || '');
+  const [search, setSearch] = useState(decodeURI(params.search?.[0]) || '');
   const [debouncedSearch] = useDebouncedValue(search, 500);
   const { data, error, isLoading, isValidating } = useSWR<any>(
     `/api/search/${debouncedSearch}`,
     fetcher
   );
+
+  useEffect(() => {
+    window.history.pushState(null, '', `/search/${debouncedSearch}`);
+  }, [debouncedSearch]);
 
   const items = data?.items;
 

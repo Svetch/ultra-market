@@ -20,7 +20,7 @@ const MainPage: React.FC = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Írd be a keresett terméket"
         />
-        <Link href={`/search?q=${encodeURIComponent(searchQuery)}`}>
+        <Link href={`/search/${encodeURIComponent(searchQuery)}`}>
           <button>Keresés</button>
         </Link>
         </div>
