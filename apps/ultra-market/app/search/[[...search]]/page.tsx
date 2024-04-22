@@ -25,7 +25,10 @@ export default function Index({ params }: { params: { search: string[] } }) {
   const [debouncedSearch] = useDebouncedValue(search, 500);
   const { data, error, isLoading, isValidating } = useSWR<any>(
     `/api/search/${debouncedSearch}`,
-    fetcher
+    fetcher,
+    {
+      errorRetryCount: 3,
+    }
   );
 
   useEffect(() => {
