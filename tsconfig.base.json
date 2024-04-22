@@ -4,36 +4,22 @@
     "rootDir": ".",
     "sourceMap": true,
     "declaration": false,
-    "moduleResolution": "node",
+    "moduleResolution": "NodeNext",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "target": "es2015",
-    "module": "esnext",
-    "lib": [
-      "es2020",
-      "dom"
-    ],
+    "target": "ESNext",
+    "module": "NodeNext",
+    "lib": ["ESNext", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@ultra-market/ui": [
-        "ui/src/index.ts"
-      ],
-      "@ultra-market/ui/*": [
-        "ui/src/*"
-      ],
-      "@ultra-market/ui-utils": [
-        "ui-utils/src/index.ts"
-      ],
-      "@ultra-market/ui-utils/*": [
-        "ui-utils/src/*"
-      ]
+      "@ultra-market/ui": ["ui/src/index.ts"],
+      "@ultra-market/ui/*": ["ui/src/*"],
+      "@ultra-market/ui-utils": ["ui-utils/src/index.ts"],
+      "@ultra-market/ui-utils/*": ["ui-utils/src/*"]
     }
   },
-  "exclude": [
-    "node_modules",
-    "tmp"
-  ]
+  "exclude": ["node_modules", "tmp"]
 }

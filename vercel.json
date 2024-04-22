@@ -1,4 +1,4 @@
 { 
-  "buildCommand": "pnpm prisma generate && pnpm nx run ultra-market:build", 
+  "buildCommand": "pnpm prisma generate && pnpm prisma migrate deploy && pnpm nx run ultra-market:build", 
   "outputDirectory": "dist/apps/ultra-market/.next" 
 } 
