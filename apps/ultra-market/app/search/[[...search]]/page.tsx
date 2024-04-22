@@ -18,7 +18,10 @@ const categories = new Array(10).fill(0).map((_, i) => {
   };
 });
 // created function to handle API request
-const fetcher = (...args) => fetch(...args).then((res) => res.json());
+const fetcher = (
+  input: RequestInfo | URL,
+  init?: RequestInit<CfProperties<unknown>> | undefined
+) => fetch(input, init).then((res) => res.json());
 
 export default function Index({ params }: { params: { search: string[] } }) {
   const router = useRouter();
@@ -65,7 +68,7 @@ export default function Index({ params }: { params: { search: string[] } }) {
       </div>
       <div className="grid lg:grid-cols-3 2xl:grid-cols-5 gap-5 p-5 grid-row auto-rows-min">
         {items &&
-          items.map((item, index) => (
+          items.map((item: any, index: number) => (
             <SearchItem
               key={item.id}
               id={item.id}
