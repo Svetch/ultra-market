@@ -8,28 +8,27 @@ const app = new Hono().basePath('/api');
 
 app.get('/search/:query?', async (ctx, params) => {
   const { query } = ctx.req.param();
-  console.log('q', query);
   const items = await db.shopItem.findMany({
     where: {
-      OR:[
-        {
-          description: {
-            contains: query,
-            mode: 'insensitive',
-          },
-        },
-        {
-          name: {
-            contains: query,
-            mode: 'insensitive',
-          }
-        },
-        {
-          tags: {
-            hasSome: query?.split(' '),
-          }
-        }
-      ]
+        OR:[
+            {
+              description: {
+                contains: query,
+                mode: 'insensitive',
+              },
+            },
+            {
+              name: {
+                contains: query,
+                mode: 'insensitive',
+              }
+            },
+            {
+              tags: {
+                hasSome: query?.split(' '),
+              }
+            }
+          ]
     },
     take: 10,
     select: {

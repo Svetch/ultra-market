@@ -7,7 +7,6 @@ import { useEffect, useState } from 'react';
 import { PriceControl } from '../../../components/price-control';
 import SearchItem from '../../../components/search-item';
 import useSWR from 'swr';
-import { useRouter } from 'next/navigation';
 
 faker.seed(123);
 
@@ -18,22 +17,21 @@ const categories = new Array(10).fill(0).map((_, i) => {
   };
 });
 // created function to handle API request
-const fetcher = (
-  input: RequestInfo | URL,
-  init?: RequestInit<CfProperties<unknown>> | undefined
-) => fetch(input, init).then((res) => res.json());
+const fetcher = (input: RequestInfo | URL, init?: RequestInit | undefined) =>
+  fetch(input, init).then((res) => res.json());
 
 export default function Index({ params }: { params: { search: string[] } }) {
-  const router = useRouter();
   const [search, setSearch] = useState(decodeURI(params.search?.[0]) || '');
-  const [debouncedSearch] = useDebouncedValue(search, 200);
+  const [debouncedSearch] = useDebouncedValue(search, 500);
   const { data, error, isLoading, isValidating } = useSWR<any>(
     `/api/search/${debouncedSearch}`,
     fetcher
   );
+
   useEffect(() => {
     window.history.pushState(null, '', `/search/${debouncedSearch}`);
   }, [debouncedSearch]);
+
   const items = data?.items;
 
   return (
