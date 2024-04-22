@@ -2,7 +2,12 @@
   "name": "@ultra-market/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "postinstall": "prisma generate"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "private": true,
   "dependencies": {
     "@clerk/localizations": "2.0.0-beta.24",
