@@ -11,10 +11,25 @@ app.get('/search/:query?', async (ctx, params) => {
   console.log('q', query);
   const items = await db.shopItem.findMany({
     where: {
-      name: {
-        contains: query,
-        mode: 'insensitive',
-      },
+      OR:[
+        {
+          description: {
+            contains: query,
+            mode: 'insensitive',
+          },
+        },
+        {
+          name: {
+            contains: query,
+            mode: 'insensitive',
+          }
+        },
+        {
+          tags: {
+            hasSome: query?.split(' '),
+          }
+        }
+      ]
     },
     take: 10,
     select: {

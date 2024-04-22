@@ -22,7 +22,7 @@ const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 export default function Index({ params }: { params: { search: string[] } }) {
   const router = useRouter();
-  const [search, setSearch] = useState(params.search?.[0] || '');
+  const [search, setSearch] = useState(decodeURI(params.search?.[0]) || '');
   const [debouncedSearch] = useDebouncedValue(search, 200);
   const { data, error, isLoading, isValidating } = useSWR<any>(
     `/api/search/${debouncedSearch}`,
