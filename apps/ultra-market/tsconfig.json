@@ -16,7 +16,7 @@
         "name": "next"
       }
     ],
-    "types": ["jest", "node"]
+    "types": ["jest", "@cloudflare/workers-types"]
   },
   "include": [
     "**/*.ts",
@@ -26,8 +26,9 @@
     "../../apps/ultra-market/.next/types/**/*.ts",
     "../../dist/apps/ultra-market/.next/types/**/*.ts",
     "next-env.d.ts",
-    ".next/types/**/*.ts"
-, "next.config.mjs"  ],
+    ".next/types/**/*.ts",
+    "next.config.mjs"
+  ],
   "exclude": [
     "node_modules",
     "jest.config.ts",
