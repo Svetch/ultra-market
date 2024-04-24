@@ -6,7 +6,10 @@ import { createDbConnection } from './db';
 import { instrument, ResolveConfigFn } from '@microlabs/otel-cf-workers';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { getRequestContext } from '@cloudflare/next-on-pages';
+import {
+  getRequestContext,
+  getOptionalRequestContext,
+} from 'node_modules/@cloudflare/next-on-pages/dist/api/index';
 import ts from 'typescript';
 
 export const runtime = 'edge';
@@ -87,12 +90,11 @@ const config: ResolveConfigFn = (env: Environment, _trigger) => {
 };
 
 const instrumented = async (req: Request, params: any, ...args: any[]) => {
-  const ctx = getRequestContext();
-  console.log('GET', ctx.waitUntil, params, args);
+  const { ctx, env } = getRequestContext();
   if (process.env.NODE_ENV === 'development') {
     return handle(app)(req, params);
   }
-  return await instrument(app, config).fetch!(req, ctx.env, ctx);
+  return await instrument(app, config).fetch!(req, env, ctx);
 };
 
 export const GET = instrumented;
