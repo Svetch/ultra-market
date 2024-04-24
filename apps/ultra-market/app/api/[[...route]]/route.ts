@@ -1,35 +1,16 @@
-import { BaselimeLogger } from '@baselime/edge-logger';
-import { instrument, ResolveConfigFn } from '@microlabs/otel-cf-workers';
 import { PrismaClient } from '@prisma/client';
 import { Hono } from 'hono';
 import { handle } from 'hono/vercel';
 import { createDbConnection } from './db';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import { getRequestContext } from 'node_modules/@cloudflare/next-on-pages/dist/api/index';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 type Environment = {
   DB: () => PrismaClient;
-  BASELIME_API_KEY: string;
-  SERVICE_NAME: string;
 };
 
 const app = new Hono<{ Bindings: Environment }>().basePath('/api');
-// init baselime
-app.use(async (ctx, next) => {
-  const logger = new BaselimeLogger({
-    service: ctx.env?.SERVICE_NAME || process.env.SERVICE_NAME!,
-    namespace: ctx.req.url,
-    apiKey: ctx.env?.BASELIME_API_KEY || process.env.BASELIME_API_KEY!,
-    ctx: ctx.executionCtx,
-    isLocalDev: process.env.NODE_ENV === 'development',
-  });
-  await next();
-  await logger.flush();
-});
 
 //init prisma
 app.use(async (ctx, next) => {
@@ -76,27 +57,5 @@ app.get('/search/:query?', async (ctx, params) => {
   return ctx.json({ items });
 });
 
-const config: ResolveConfigFn = (env: Environment, _trigger) => {
-  return {
-    exporter: {
-      url: 'https://otel.baselime.io/v1',
-      headers: { 'x-api-key': env.BASELIME_API_KEY },
-    },
-    service: { name: env.SERVICE_NAME },
-  };
-};
-
-const instrumented = async (req: Request, params: any, ...args: any[]) => {
-  try {
-    const { ctx, env } = getRequestContext();
-    if (process.env.NODE_ENV === 'development') {
-      return handle(app)(req, params);
-    }
-    return await instrument(app, config).fetch!(req, env, ctx);
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-export const GET = instrumented;
-export const POST = instrumented;
+export const GET = handle(app);
+export const POST = handle(app);
