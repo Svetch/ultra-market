@@ -85,6 +85,6 @@ const config: ResolveConfigFn = (env: Environment, _trigger) => {
   };
 };
 
-const instrumented = instrument({ fetch: handle(app) }, config);
+const instrumented = instrument({ fetch: handle(app) }, config).fetch;
 export const GET = instrumented;
 export const POST = instrumented;
