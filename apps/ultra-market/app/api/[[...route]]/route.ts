@@ -87,10 +87,11 @@ const config: ResolveConfigFn = (env: Environment, _trigger) => {
 };
 
 const instrumented = async (req: Request, params: any) => {
+  const ctx = getRequestContext();
+  console.log(ctx.waitUntil);
   if (process.env.NODE_ENV === 'development') {
     return handle(app)(req, params);
   }
-  const ctx = getRequestContext();
   return await instrument(app, config).fetch!(req, ctx.env, ctx);
 };
 
