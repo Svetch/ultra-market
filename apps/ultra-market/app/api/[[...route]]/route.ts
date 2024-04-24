@@ -1,18 +1,17 @@
 import { BaselimeLogger } from '@baselime/edge-logger';
+import { instrument, ResolveConfigFn } from '@microlabs/otel-cf-workers';
 import { PrismaClient } from '@prisma/client';
 import { Hono } from 'hono';
 import { handle } from 'hono/vercel';
 import { createDbConnection } from './db';
-import { instrument, ResolveConfigFn } from '@microlabs/otel-cf-workers';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import {
-  getRequestContext,
-  getOptionalRequestContext,
+  getRequestContext
 } from 'node_modules/@cloudflare/next-on-pages/dist/api/index';
-import ts from 'typescript';
 
 export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
 
 type Environment = {
   DB: () => PrismaClient;
