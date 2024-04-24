@@ -86,9 +86,9 @@ const config: ResolveConfigFn = (env: Environment, _trigger) => {
   };
 };
 
-const instrumented = async (req: Request, params: any) => {
+const instrumented = async (req: Request, params: any, ...args: any[]) => {
   const ctx = getRequestContext();
-  console.log(ctx.waitUntil);
+  console.log('GET', ctx.waitUntil, params, args);
   if (process.env.NODE_ENV === 'development') {
     return handle(app)(req, params);
   }
