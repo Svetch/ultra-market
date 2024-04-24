@@ -72,6 +72,5 @@ app.get('/search/:query?', async (ctx, params) => {
 
   return ctx.json({ items });
 });
-const handleRequest = handle(app);
-export const GET = handleRequest;
-export const POST = handleRequest;
+export const GET = handle(app);
+export const POST = handle(app);
