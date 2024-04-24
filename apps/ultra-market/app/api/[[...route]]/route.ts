@@ -3,19 +3,21 @@ import { PrismaClient } from '@prisma/client';
 import { Hono } from 'hono';
 import { handle } from 'hono/vercel';
 import { createDbConnection } from './db';
+import { instrument, ResolveConfigFn } from '@microlabs/otel-cf-workers';
 
 export const runtime = 'edge';
 
 type Environment = {
   DB: () => PrismaClient;
   BASELIME_API_KEY: string;
+  SERVICE_NAME: string;
 };
 
 const app = new Hono<{ Bindings: Environment }>().basePath('/api');
 // init baselime
 app.use(async (ctx, next) => {
   const logger = new BaselimeLogger({
-    service: 'ultra-market',
+    service: ctx.env?.SERVICE_NAME || process.env.SERVICE_NAME!,
     namespace: ctx.req.url,
     apiKey: ctx.env?.BASELIME_API_KEY || process.env.BASELIME_API_KEY!,
     ctx: ctx.executionCtx,
@@ -72,5 +74,17 @@ app.get('/search/:query?', async (ctx, params) => {
 
   return ctx.json({ items });
 });
-export const GET = handle(app);
-export const POST = handle(app);
+
+const config: ResolveConfigFn = (env: Environment, _trigger) => {
+  return {
+    exporter: {
+      url: 'https://otel.baselime.io/v1',
+      headers: { 'x-api-key': env.BASELIME_API_KEY },
+    },
+    service: { name: env.SERVICE_NAME },
+  };
+};
+
+const instrumented = instrument({ fetch: handle(app) }, config);
+export const GET = instrumented;
+export const POST = instrumented;
