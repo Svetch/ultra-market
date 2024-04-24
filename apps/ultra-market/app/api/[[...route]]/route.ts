@@ -4,6 +4,10 @@ import { Hono } from 'hono';
 import { handle } from 'hono/vercel';
 import { createDbConnection } from './db';
 import { instrument, ResolveConfigFn } from '@microlabs/otel-cf-workers';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import { getRequestContext } from '@cloudflare/next-on-pages';
+import ts from 'typescript';
 
 export const runtime = 'edge';
 
@@ -85,6 +89,13 @@ const config: ResolveConfigFn = (env: Environment, _trigger) => {
   };
 };
 
-const instrumented = instrument({ fetch: handle(app) }, config).fetch;
+const instrumented = async (req: Request, params: any) => {
+  if (process.env.NODE_ENV === 'development') {
+    return handle(app)(req, params);
+  }
+  const ctx = getRequestContext();
+  return await instrument(app, config).fetch!(req, ctx.env, ctx);
+};
+
 export const GET = instrumented;
 export const POST = instrumented;

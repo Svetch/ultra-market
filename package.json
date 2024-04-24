@@ -14,6 +14,7 @@
     "@clerk/localizations": "2.0.0-beta.24",
     "@clerk/nextjs": "5.0.0-beta.46",
     "@clerk/themes": "2.0.0-beta.15",
+    "@cloudflare/next-on-pages": "^1.11.1",
     "@faker-js/faker": "^8.4.1",
     "@mantine/hooks": "^7.8.0",
     "@microlabs/otel-cf-workers": "1.0.0-rc.36",
@@ -50,7 +51,7 @@
   "devDependencies": {
     "@babel/core": "^7.14.5",
     "@babel/preset-react": "^7.14.5",
-    "@cloudflare/workers-types": "^4.20240419.0",
+    "@cloudflare/workers-types": "^4.20240423.0",
     "@faker-js/faker": "^8.4.1",
     "@nx-extend/shadcn-ui": "^1.0.2",
     "@nx/cypress": "18.3.2",

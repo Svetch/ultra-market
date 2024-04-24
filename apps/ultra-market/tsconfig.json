@@ -16,7 +16,7 @@
         "name": "next"
       }
     ],
-    "types": ["jest", "@cloudflare/workers-types"]
+    "types": ["jest", "@cloudflare/workers-types/2023-07-01"]
   },
   "include": [
     "**/*.ts",

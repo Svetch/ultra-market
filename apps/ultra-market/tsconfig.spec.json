@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "module": "NodeNext",
-    "types": ["jest", "node"],
+    "types": ["jest", "@cloudflare/workers-types/2023-07-01"],
     "jsx": "react"
   },
   "include": [

@@ -1,7 +1,10 @@
-//@ts-check
-
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import { composePlugins, withNx } from '@nx/next';
+import { setupDevPlatform } from '@cloudflare/next-on-pages/next-dev';
+
+if (process.env.NODE_ENV === 'development') {
+  await setupDevPlatform({});
+}
 
 /**
  * @type {import('@nx/next/plugins/with-nx.js').WithNxOptions}
