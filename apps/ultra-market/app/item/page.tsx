@@ -1,3 +1,4 @@
+'use client'
 import React from 'react';
 import ItemDetailPage from './../../components/detailed-item';
 import ImageSlider from './../../components/image-slider';
@@ -7,7 +8,6 @@ const ItemDetailExample: React.FC = () => {
     '/watch_black.jpg',
     '/watch_white.jpg',
     '/watch_grey.jpg',
-    // Add more image URLs here
   ];
 
   const item = {

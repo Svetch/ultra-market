@@ -1,5 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
+import { useCookies } from 'react-cookie';
+import { useSearchParams } from 'next/navigation'
 
 
 interface ItemDetail {
@@ -15,6 +17,16 @@ interface ItemDetailPageProps {
 
 const ItemDetailPage: React.FC<ItemDetailPageProps> = ({ item }) => {
   const formatter = new Intl.NumberFormat('hu-HU');
+  const [cookies, setCookie] = useCookies(['cart']);
+  const navigation = useSearchParams()
+  const itemId = navigation.get('id')
+  
+  const handleOrder = () => {
+    const newItem = itemId as string;
+
+    const updatedCart = [...(cookies.cart || []), newItem];
+    setCookie('cart', updatedCart)
+  };
 
   return (
     <div className="item-detail-page">
@@ -24,7 +36,7 @@ const ItemDetailPage: React.FC<ItemDetailPageProps> = ({ item }) => {
 
         <div className="flex items-center space-x-4">
           <p className="item-price">{formatter.format(item.price)} Ft</p>
-          <button /*onClick={goToPrevious}*/ className="bg-blue-500 hover:bg-slate-800 transition duration-300 text-white p-2 rounded-md mr-2" >
+          <button onClick={handleOrder} className="bg-blue-500 hover:bg-slate-800 transition duration-300 text-white p-2 rounded-md mr-2" >
             Megrendelés
           </button>
         </div>
