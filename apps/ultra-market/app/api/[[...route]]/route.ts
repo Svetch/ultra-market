@@ -28,10 +28,7 @@ app.use(async (ctx, next) => {
     isLocalDev: process.env.NODE_ENV === 'development',
   });
   await next();
-  if (ctx.executionCtx.waitUntil) ctx.executionCtx.waitUntil(logger.flush());
-  else {
-    await logger.flush();
-  }
+  await logger.flush();
 });
 
 //init prisma
