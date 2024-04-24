@@ -6,9 +6,7 @@ import { handle } from 'hono/vercel';
 import { createDbConnection } from './db';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import {
-  getRequestContext
-} from 'node_modules/@cloudflare/next-on-pages/dist/api/index';
+import { getRequestContext } from 'node_modules/@cloudflare/next-on-pages/dist/api/index';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
@@ -89,11 +87,15 @@ const config: ResolveConfigFn = (env: Environment, _trigger) => {
 };
 
 const instrumented = async (req: Request, params: any, ...args: any[]) => {
-  const { ctx, env } = getRequestContext();
-  if (process.env.NODE_ENV === 'development') {
-    return handle(app)(req, params);
+  try {
+    const { ctx, env } = getRequestContext();
+    if (process.env.NODE_ENV === 'development') {
+      return handle(app)(req, params);
+    }
+    return await instrument(app, config).fetch!(req, env, ctx);
+  } catch (error) {
+    console.error(error);
   }
-  return await instrument(app, config).fetch!(req, env, ctx);
 };
 
 export const GET = instrumented;
