@@ -133,6 +133,9 @@ const Navbar: React.FC<NavbarProps> = ({items, logo}) => {
             </CommandGroup>
           </CommandList>
         </CommandDialog>
+        <Link href="/shopping-cart" className="flex items-center gap-2 text-lg font-semibold md:text-base">
+          <Image src="/cart.png" alt="kosár" width={32} height={32}/>
+        </Link>
         <SignedIn>
           <UserButton/>
         </SignedIn>
