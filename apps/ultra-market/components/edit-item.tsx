@@ -138,7 +138,7 @@ const EditableProductPage: React.FC<EditableProductPageProps> = ({ product, onSa
 
             {/* Submit button */}
             <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded">
-                Save Changes
+                Változások mentése
             </button>
         </form>
     );

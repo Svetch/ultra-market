@@ -16,7 +16,6 @@ const AddItemPage: React.FC<AddItemPageProps> = ({ onSubmit }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Create a FormData object to send to the onSubmit function
     const formData = new FormData();
     formData.append('name', name);
     formData.append('price', price);
@@ -30,7 +29,6 @@ const AddItemPage: React.FC<AddItemPageProps> = ({ onSubmit }) => {
     formData.append('tags', tags);
     formData.append('stock', stock);
 
-    // Pass the form data to the onSubmit function
     onSubmit(formData);
   };
 
