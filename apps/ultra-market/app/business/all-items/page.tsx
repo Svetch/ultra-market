@@ -41,17 +41,5 @@ export default async function Index() {
                 />
             ))}
         </div>
-        /*<div>
-            {mockItems.map((item, index) => (
-                <SearchItem
-                key={index}
-                id={item.id}
-                itemName={item.itemName}
-                price={item.price}
-                imageUrl={item.imageUrl}
-                edit={item.edit}
-                />
-            ))}
-        </div>*/
     );
 }

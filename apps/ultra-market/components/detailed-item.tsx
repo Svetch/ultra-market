@@ -36,7 +36,7 @@ const ItemDetailPage: React.FC<ItemDetailPageProps> = ({ item }) => {
 
         <div className="flex items-center space-x-4">
           <p className="item-price">{formatter.format(item.price)} Ft</p>
-          <button onClick={handleOrder} className="bg-blue-500 hover:bg-slate-800 transition duration-300 text-white p-2 rounded-md mr-2" >
+          <button onClick={handleOrder} className="bg-green-600 hover:bg-green-800 transition duration-300 text-white p-2 rounded-md mr-2" >
             Megrendelés
           </button>
         </div>
@@ -45,7 +45,7 @@ const ItemDetailPage: React.FC<ItemDetailPageProps> = ({ item }) => {
         <div className="pt-10">
           {item.tags.map((tag, index) => (
             <Link key={index} href={`/search?q=${encodeURIComponent(tag)}`} >
-              <span className="tag">{tag}</span>
+              <span className="p-2 mx-1 rounded-sm bg-green-800">{tag}</span>
             </Link>
           ))}
         </div>

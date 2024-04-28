@@ -30,7 +30,7 @@ const ParentComponent: React.FC = () => {
     };
 
     return (
-        <div className="container mx-auto bg-neutral-800 rounded-lg p-5 m-10">
+        <div className="container mx-auto bg-neutral-800 rounded p-5 my-10">
             <h1 className="text-3xl font-bold mb-4 text-white">Áru szerkesztése</h1>
 
             <EditableProductPage product={mockProduct} onSave={handleSave} />

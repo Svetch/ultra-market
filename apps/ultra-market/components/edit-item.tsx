@@ -1,3 +1,4 @@
+import ConfirmationDialog from './item-removal-confirmation';
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import Image from 'next/image';
 
@@ -22,6 +23,7 @@ const EditableProductPage: React.FC<EditableProductPageProps> = ({ product, onSa
     const [tags, setTags] = useState(product.tags);
     const [price, setPrice] = useState(product.price);
     const [stock, setStock] = useState(product.stock);
+    const [isDialogVisible, setDialogVisible] = useState(false);
 
     const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -48,6 +50,13 @@ const EditableProductPage: React.FC<EditableProductPageProps> = ({ product, onSa
         onSave(updatedProduct);
     };
 
+    const handleRemove = () => {
+        setDialogVisible(false);
+    };
+    const handleCancel = () => {
+        setDialogVisible(false);
+    };
+
     return (
         <form onSubmit={handleFormSubmit} className="space-y-6">
             {/* Image Upload */}
@@ -56,11 +65,11 @@ const EditableProductPage: React.FC<EditableProductPageProps> = ({ product, onSa
                 <div className="flex flex-wrap space-x-2">
                     {images.map((image, index) => (
                         <div key={index} className="relative w-24 h-24">
-                            <Image src={image} alt={`Product image ${index + 1}`} layout="fill" objectFit="cover" />
+                            <Image src={image} alt={`Product image ${index + 1}`} layout="fill" objectFit="cover" className="rounded-sm"/>
                             <button
                                 type="button"
                                 onClick={() => handleRemoveImage(index)}
-                                className="absolute top-0 right-0 p-2 bg-red-500 text-white rounded-full"
+                                className="absolute top-0 right-0 px-2 py-0.5 bg-red-500 text-white rounded-sm"
                             >
                                 X
                             </button>
@@ -106,15 +115,15 @@ const EditableProductPage: React.FC<EditableProductPageProps> = ({ product, onSa
                 <input
                     id="tags"
                     type="text"
-                    value={tags.join(', ')}
-                    onChange={(e) => setTags(e.target.value.split(','))}
+                    value={tags.join(',')}
+                    onChange={(e) => setTags(e.target.value.split(/,\s*/))}
                     className="mt-1 p-2 border rounded w-full"
                 />
             </div>
 
             {/* Price */}
             <div>
-                <label htmlFor="price" className="block text-lg font-medium text-white">Ár</label>
+                <label htmlFor="price" className="block text-lg font-medium text-white">Ár (Ft)</label>
                 <input
                     id="price"
                     type="number"
@@ -136,10 +145,18 @@ const EditableProductPage: React.FC<EditableProductPageProps> = ({ product, onSa
                 />
             </div>
 
-            {/* Submit button */}
-            <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded">
+            {/* Buttons */}
+            <button type="submit" className="float-start px-4 py-2 bg-green-600 hover:bg-green-800 transition text-white rounded">
                 Változások mentése
             </button>
+            <button onClick={() => setDialogVisible(true)} className="float-end px-4 py-2 bg-red-500 text-white rounded">
+                Árucikk törlése
+            </button>
+            <ConfirmationDialog
+                isVisible={isDialogVisible}
+                onConfirm={handleRemove}
+                onCancel={handleCancel}
+            />
         </form>
     );
 };

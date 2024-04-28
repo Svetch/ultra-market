@@ -22,30 +22,24 @@ const ShoppingCart: React.FC = () => {
     const groupAndCountItems = (items: string[]): CartItem[] => {
         const itemMap = new Map<string, number>();
 
-        // Count occurrences of each item
         items.forEach((itemId) => {
             itemMap.set(itemId, (itemMap.get(itemId) || 0) + 1);
         });
 
-        // Convert the map to an array of CartItem objects
         return Array.from(itemMap.entries()).map(([id, quantity]) => ({
             id,
             quantity,
         }));
     };
 
-    // Get grouped and counted cart items
     const groupedCartItems = groupAndCountItems(cartItems);
 
 
     const removeItem = (itemId: string) => {
-        // Find the index of the item to remove
         const index = cartItems.findIndex((id) => id === itemId);
         if (index !== -1) {
-            // Create a copy of the cart array and remove one instance of the item
             const updatedCart = [...cartItems];
             updatedCart.splice(index, 1);
-            // Update the cart cookie with the modified cart array
             setCookie("cart", updatedCart, { path: '/' });
         }
     };
@@ -107,7 +101,7 @@ const ShoppingCart: React.FC = () => {
                     )}
 
                     <Link href={"/ordering"} passHref>
-                        <button className="w-full h-12 mt-5 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        <button className="w-full h-12 mt-5 text-white rounded bg-green-600 hover:bg-green-800 transition">
                             Tovább a rendeléshez
                         </button>
                     </Link>

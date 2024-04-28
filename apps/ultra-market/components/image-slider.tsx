@@ -27,13 +27,13 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ images }) => {
             <div className="flex mt-4">
                 <button
                     onClick={goToPrevious}
-                    className="bg-blue-500 hover:bg-slate-800 transition duration-300 text-white min-w-40 p-2 rounded-md mr-2"
+                    className="bg-green-600 hover:bg-green-800 transition duration-300 text-white min-w-40 p-2 rounded-md mr-2"
                 >
                     ◄
                 </button>
                 <button
                     onClick={goToNext}
-                    className="bg-blue-500 hover:bg-slate-800 transition duration-300 text-white min-w-40 p-2 rounded-md"
+                    className="bg-green-600 hover:bg-green-800 transition duration-300 text-white min-w-40 p-2 rounded-md"
                 >
                     ►
                 </button>

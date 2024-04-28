@@ -33,31 +33,31 @@ const AddItemPage: React.FC<AddItemPageProps> = ({ onSubmit }) => {
   };
 
   return (
-    <div className="auth-form">
+    <div className="max-w-sm mx-auto my-5 p-5 rounded bg-neutral-800">
       <h2>Új termék feltöltése</h2>
       <form onSubmit={handleSubmit}>
         <label>Név:</label>
-        <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+        <input className="w-full rounded mb-5 min-h-10 text-black" type="text" value={name} onChange={(e) => setName(e.target.value)} required />
 
         <label>Ár:</label>
-        <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} required />
+        <input className="w-full rounded mb-5 min-h-10 text-black" type="number" value={price} onChange={(e) => setPrice(e.target.value)} required />
 
         <label>Rövid leírás:</label>
-        <input type="text" value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} required />
+        <input className="w-full rounded mb-5 min-h-10 text-black" type="text" value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} required />
 
         <label>Leírás:</label>
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} required />
+        <textarea className="w-full rounded-sm mb-5 min-h-32 text-black" value={description} onChange={(e) => setDescription(e.target.value)} required />
 
         <label>Képek:</label>
-        <input type="file" accept="image/*" multiple onChange={(e) => setImages(e.target.files)} />
+        <input className="w-full mb-5 min-h-10" type="file" accept="image/*" multiple onChange={(e) => setImages(e.target.files)} />
 
         <label>Tagek:</label>
-        <input type="text" value={tags} onChange={(e) => setTags(e.target.value)} />
+        <input className="w-full rounded mb-5 min-h-10 text-black" type="text" value={tags} onChange={(e) => setTags(e.target.value)} />
 
         <label>Készlet:</label>
-        <input type="number" value={stock} onChange={(e) => setStock(e.target.value)} required />
+        <input className="w-full rounded mb-5 min-h-10 text-black" type="number" value={stock} onChange={(e) => setStock(e.target.value)} required />
 
-        <button type="submit">Feltöltés</button>
+        <button className="w-full h-12 mt-5 text-white rounded bg-green-600 hover:bg-green-800 transition">Feltöltés</button>
       </form>
     </div>
   );
