@@ -8,6 +8,7 @@ export default async function Index() {
             price: 19.99,
             imageUrl: '/watch_black.jpg',
             edit: true,
+            description: 'Example Item 1',
         },
         {
             id: 2,
@@ -26,7 +27,21 @@ export default async function Index() {
     ];
     
     return (
-        <div>
+
+        <div className="grid lg:grid-cols-3 2xl:grid-cols-5 gap-5 p-5 grid-row auto-rows-min">
+            {mockItems.map((item, index) => (
+                <SearchItem
+                key={index}
+                id={item.id}
+                itemName={item.itemName}
+                price={item.price}
+                imageUrl={item.imageUrl}
+                edit={item.edit}
+                description={item.description}
+                />
+            ))}
+        </div>
+        /*<div>
             {mockItems.map((item, index) => (
                 <SearchItem
                 key={index}
@@ -37,6 +52,6 @@ export default async function Index() {
                 edit={item.edit}
                 />
             ))}
-        </div>
+        </div>*/
     );
 }
