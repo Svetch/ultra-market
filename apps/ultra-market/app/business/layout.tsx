@@ -9,6 +9,7 @@ export default function Layout({children}: { children: React.ReactNode }) {
     {children: 'Áttekintés', href: '/business'},
     {children: 'Árucikkeim', href: '/business/all-items'},
     {children: 'Új árucikk hozzáadása', href: '/business/add-item'},
+    {children: 'Rendelések', href: '/business/orders'},
   ];
   return (
     <div className="grid grid-rows-[auto,1fr,auto] min-h-screen w-full">
