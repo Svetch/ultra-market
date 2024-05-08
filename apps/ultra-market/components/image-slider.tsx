@@ -1,45 +1,37 @@
 'use client';
 import React, { useState } from 'react';
 import Image from 'next/image';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@ultra-market/ui/carousel';
+import { Card, CardContent } from '@ultra-market/ui/card';
 
 interface ImageSliderProps {
-    images: string[];
+  images: string[];
 }
 
 const ImageSlider: React.FC<ImageSliderProps> = ({ images }) => {
-    const [currentIndex, setCurrentIndex] = useState(0);
-
-    const goToPrevious = () => {
-        setCurrentIndex((prevIndex) =>
-            prevIndex === 0 ? images.length - 1 : prevIndex - 1
-        );
-    };
-
-    const goToNext = () => {
-        setCurrentIndex((prevIndex) =>
-            prevIndex === images.length - 1 ? 0 : prevIndex + 1
-        );
-    };
-
-    return (
-        <div className="flex flex-col items-center">
-            <Image src={images[currentIndex]} width={300} height={300} alt={`Slide ${currentIndex}`} className="h-[225px] sm:h-[475px] w-auto mt-[30px] rounded-md shadow-md" />
-            <div className="flex mt-4">
-                <button
-                    onClick={goToPrevious}
-                    className="bg-green-600 hover:bg-green-800 transition duration-300 text-white min-w-40 p-2 rounded-md mr-2"
-                >
-                    ◄
-                </button>
-                <button
-                    onClick={goToNext}
-                    className="bg-green-600 hover:bg-green-800 transition duration-300 text-white min-w-40 p-2 rounded-md"
-                >
-                    ►
-                </button>
-            </div>
-        </div>
-    );
+  return (
+    <div className="flex flex-col items-center">
+      <Carousel className="">
+        <CarouselContent>
+          {images.map((image, index) => (
+            <CarouselItem key={index}>
+              <div className="p-1">
+                <img className="w-full h-full" src={image} alt="" />
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+      </Carousel>
+    </div>
+  );
 };
 
 export default ImageSlider;

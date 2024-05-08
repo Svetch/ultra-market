@@ -105,6 +105,34 @@ app.get('/categories', async (ctx) => {
   return ctx.json(categories);
 });
 
+app.get('/item/:id', async (ctx) => {
+  const DB = ctx.env.DB();
+  const id = parseInt(ctx.req.param('id'));
+  if (isNaN(id)) return ctx.json({ error: 'Invalid id' }, 400);
+
+  const item = await DB.shopItem.findUnique({
+    where: {
+      id,
+    },
+    select: {
+      id: true,
+      name: true,
+      price: true,
+      images: true,
+      description: true,
+      organizationId: true,
+      categories: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
+    },
+  });
+
+  return ctx.json(item);
+});
+
 export const GET = handle(app);
 export const POST = handle(app);
 

@@ -1,6 +1,5 @@
 'use client';
-import React from 'react';
-import Link from 'next/link';
+import { Button } from '@ultra-market/ui/button';
 import {
   Card,
   CardContent,
@@ -9,8 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@ultra-market/ui/card';
-import { useInView } from 'framer-motion';
 import { motion } from 'framer-motion';
+import { ShoppingCart } from 'lucide-react';
+import Link from 'next/link';
+import React from 'react';
+import { useCartStore } from './cart';
+import { toast } from 'sonner';
 
 const variants = {
   hidden: { opacity: 0 },
@@ -36,41 +39,60 @@ const SearchItem: React.FC<SearchItemProps> = ({
   description,
   index,
 }) => {
-  const hrefValue = edit ? `/business/edit-item?id=${id}` : `/item?id=${id}`;
-  const ref = React.useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, {
-    once: true,
-  });
-
+  const hrefValue = edit ? `/business/edit-item/${id}` : `/item/${id}`;
+  const { addToCart, openCart } = useCartStore();
   return (
-    <Link href={hrefValue} className="transition-all hover:scale-105 flex">
-      <motion.div
-        ref={ref}
-        initial="hidden"
-        whileInView="visible"
-        transition={{
-          delay: Math.min((index % 10) * 0.1, 0.3),
-          ease: 'easeInOut',
-          duration: 0.2,
-        }}
-        viewport={{ once: true }}
-        variants={variants}
-        className="flex"
-      >
-        <Card className="border-gray-500 grid grid-rows-[auto,1fr,auto]">
-          <CardHeader className="p-0">
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      transition={{
+        delay: Math.min((index % 10) * 0.1, 0.3),
+        ease: 'easeInOut',
+        duration: 0.2,
+      }}
+      viewport={{ once: true }}
+      variants={variants}
+      className="flex transition-all hover:scale-105 "
+    >
+      <Card className="border-gray-500 grid grid-rows-[auto,1fr,auto]">
+        <CardHeader className="p-0">
+          <Link href={hrefValue} className="flex">
             <img src={imageUrl} alt={itemName} className="rounded-lg" />
-          </CardHeader>
-          <CardContent className="py-2">
+          </Link>
+        </CardHeader>
+        <CardContent className="py-2">
+          <Link href={hrefValue} className="">
             <CardTitle className="tect-center text-lg">{itemName}</CardTitle>
             <CardDescription>{description}</CardDescription>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <p className="text-lg">{price.toFixed(2)} Ft</p>
-          </CardFooter>
-        </Card>
-      </motion.div>
-    </Link>
+          </Link>
+        </CardContent>
+        <CardFooter className="flex justify-between">
+          <p className="text-lg">{price.toFixed(2)} Ft</p>
+          <Button
+            onClick={() => {
+              addToCart({
+                categories: [],
+                description: '',
+                id,
+                images: [imageUrl],
+                name: itemName,
+                price,
+              });
+              toast('Sikeresen hozzáadtál egy terméket a korárhoz', {
+                action: {
+                  label: 'Kosárhoz',
+                  onClick: openCart,
+                },
+                duration: 3000,
+              });
+            }}
+            className="transition-all hover:scale-105"
+          >
+            <ShoppingCart />
+          </Button>
+        </CardFooter>
+      </Card>
+    </motion.div>
   );
 };
 

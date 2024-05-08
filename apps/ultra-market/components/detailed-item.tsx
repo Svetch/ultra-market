@@ -1,14 +1,15 @@
-import React from 'react';
 import Link from 'next/link';
-import { useCookies } from 'react-cookie';
-import { useSearchParams } from 'next/navigation'
-
+import React from 'react';
+import { toast } from 'sonner';
+import { useCartStore } from './cart';
 
 interface ItemDetail {
   name: string;
   description: string;
   price: number;
-  tags: string[];
+  categories: { id: number; name: string }[];
+  id: number;
+  images: string[];
 }
 
 interface ItemDetailPageProps {
@@ -16,16 +17,21 @@ interface ItemDetailPageProps {
 }
 
 const ItemDetailPage: React.FC<ItemDetailPageProps> = ({ item }) => {
-  const formatter = new Intl.NumberFormat('hu-HU');
-  const [cookies, setCookie] = useCookies(['cart']);
-  const navigation = useSearchParams()
-  const itemId = navigation.get('id')
-  
-  const handleOrder = () => {
-    const newItem = itemId as string;
+  const formatter = new Intl.NumberFormat('hu-HU', {
+    style: 'currency',
+    currency: 'HUF',
+  });
+  const { addToCart, openCart } = useCartStore();
 
-    const updatedCart = [...(cookies.cart || []), newItem];
-    setCookie('cart', updatedCart)
+  const handleOrder = () => {
+    addToCart(item);
+    toast('Sikeresen hozzáadtál egy terméket a korárhoz', {
+      action: {
+        label: 'Kosárhoz',
+        onClick: openCart,
+      },
+      duration: 3000,
+    });
   };
 
   return (
@@ -35,17 +41,22 @@ const ItemDetailPage: React.FC<ItemDetailPageProps> = ({ item }) => {
         <p className="item-description">{item.description}</p>
 
         <div className="flex items-center space-x-4">
-          <p className="item-price">{formatter.format(item.price)} Ft</p>
-          <button onClick={handleOrder} className="bg-green-600 hover:bg-green-800 transition duration-300 text-white p-2 rounded-md mr-2" >
+          <p className="item-price">{formatter.format(item.price)}</p>
+          <button
+            onClick={handleOrder}
+            className="bg-green-600 hover:bg-green-800 transition duration-300 text-white p-2 rounded-md mr-2"
+          >
             Megrendelés
           </button>
         </div>
-        
-        
+
         <div className="pt-10">
-          {item.tags.map((tag, index) => (
-            <Link key={index} href={`/search?q=${encodeURIComponent(tag)}`} >
-              <span className="p-2 mx-1 rounded-sm bg-green-800">{tag}</span>
+          {item.categories.map((c, index) => (
+            <Link
+              key={index}
+              href={`/search?category=${encodeURIComponent(c.id)}`}
+            >
+              <span className="p-2 mx-1 rounded-sm bg-green-800">{c.name}</span>
             </Link>
           ))}
         </div>
@@ -53,6 +64,5 @@ const ItemDetailPage: React.FC<ItemDetailPageProps> = ({ item }) => {
     </div>
   );
 };
-
 
 export default ItemDetailPage;
