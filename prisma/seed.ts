@@ -9,20 +9,19 @@ async function main() {
     new Array(10).fill(0).map((_, i) => {
       return prisma.user.upsert({
         update: {},
-        where: { id: i },
+        where: { id: i + 1 },
         create: {
-          id: i,
+          id: i + 1,
         },
       });
     })
   );
 
-  
   const orgs = await Promise.all(
     new Array(10).fill(0).map((_, i) => {
       return prisma.organization.upsert({
         update: {},
-        where: { id: i },
+        where: { id: i + 1 },
         create: {
           name: faker.company.name(),
           logo: faker.image.url(),
@@ -34,7 +33,8 @@ async function main() {
       });
     })
   );
-  for (let i = 0; i < 100; i++) {
+  for (let i = 1; i <= 100; i++) {
+    const category = faker.commerce.department();
     await prisma.shopItem.upsert({
       where: { id: i },
       update: {},
@@ -45,6 +45,16 @@ async function main() {
         images: [faker.image.url()],
         description: faker.commerce.productDescription(),
         organizationId: orgs[faker.number.int(orgs.length - 1)].id,
+        categories: {
+          connectOrCreate: {
+            where: {
+              name: category,
+            },
+            create: {
+              name: category,
+            },
+          },
+        },
       },
     });
   }

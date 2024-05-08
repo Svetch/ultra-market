@@ -4,8 +4,16 @@ import { cn } from '@ultra-market/ui-utils';
 import { Slider } from '@ultra-market/ui/slider';
 import { useState } from 'react';
 
-export function PriceControl() {
-  const [localValues, setLocalValues] = useState([0, 100_000]);
+export function PriceControl({
+  name,
+  defaultValue,
+  max,
+}: {
+  name?: string;
+  defaultValue: [number, number];
+  max: number;
+}) {
+  const [localValues, setLocalValues] = useState(defaultValue);
 
   const handleValueChange = (newValues: any) => {
     setLocalValues(newValues);
@@ -14,13 +22,14 @@ export function PriceControl() {
   return (
     <div className="grid gap-4 w-full max-w-80 rounded-[12px]">
       <Slider
-        defaultValue={[100, 50_000]}
-        minStepsBetweenThumbs={10_000}
-        max={300_000}
+        defaultValue={defaultValue}
+        minStepsBetweenThumbs={defaultValue?.reduce((a, b) => a + b, 0) / 10}
+        max={max}
         min={0}
         step={1}
         onValueChange={handleValueChange}
         className={cn('w-full')}
+        name={name}
       />
       <div className="flex gap-2 flex-wrap">
         <ol className="flex items-center w-full gap-3">

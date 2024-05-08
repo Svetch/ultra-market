@@ -6,7 +6,7 @@ datasource db {
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
+  previewFeatures = ["driverAdapters", "fullTextSearch"]
 }
 
 model User {
@@ -39,11 +39,20 @@ model ShopItem {
   description    String
   price          Int
   images         String[]
-  tags           String[]
+  categories     Category[]
   Order          Order?       @relation(fields: [orderId], references: [id])
   orderId        Int?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+}
+
+model Category {
+  id         Int        @id @default(autoincrement())
+  name       String     @unique
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  ShopItem   ShopItem[]
+  shopItemId Int?
 }
 
 model Order {

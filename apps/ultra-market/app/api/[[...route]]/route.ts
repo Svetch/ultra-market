@@ -18,44 +18,125 @@ app.use(async (ctx, next) => {
   await next();
 });
 
-app.get('/search/:query?', async (ctx, params) => {
+app.get('/search', async (ctx, e) => {
+  //wait for 10 seconds
+
+  //  await new Promise((resolve) => setTimeout(resolve, 10000));
+
   const DB = ctx.env.DB();
-  const { query } = ctx.req.param();
+  const { query, category, price, cursor } = ctx.req.query();
+  const [min, max] = price?.split(',').map(Number) || [0, 3000];
+
   const items = await DB.shopItem.findMany({
+    ...(cursor && {
+      cursor: {
+        id: parseInt(cursor),
+      },
+    }),
     where: {
-      OR: [
-        {
-          description: {
-            contains: query,
-            mode: 'insensitive',
+      ...(category && {
+        categories: {
+          some: {
+            id: parseInt(category),
           },
         },
-        {
-          name: {
-            contains: query,
-            mode: 'insensitive',
-          },
+      }),
+      ...(price && {
+        price: {
+          gte: min,
+          lte: max,
         },
-        {
-          tags: {
-            hasSome: query?.split(' '),
+      }),
+      ...(query && {
+        OR: [
+          {
+            name: {
+              search: query,
+            },
           },
-        },
-      ],
+          {
+            description: {
+              search: query,
+            },
+          },
+        ],
+      }),
     },
-    take: 10,
+    take: 11,
     select: {
       id: true,
       name: true,
       price: true,
       images: true,
       description: true,
-      tags: true,
+      categories: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
+    },
+    orderBy: {
+      ...(query && {
+        _relevance: {
+          fields: ['name', 'description'],
+          search: query,
+          sort: 'desc',
+        },
+      }),
     },
   });
 
-  return ctx.json({ items });
+  return ctx.json(paginate({ take: 10 }, items));
+});
+
+app.get('/categories', async (ctx) => {
+  const DB = ctx.env.DB();
+  const categories = await DB.category.findMany({
+    select: {
+      name: true,
+      id: true,
+    },
+    orderBy: {
+      name: 'asc',
+    },
+  });
+
+  return ctx.json(categories);
 });
 
 export const GET = handle(app);
 export const POST = handle(app);
+
+export function paginate<T extends { id: number | string }>(
+  query: {
+    take: number;
+  },
+  data: T[]
+): {
+  data: T[];
+  metaData: {
+    lastCursor: number | string | null;
+    hasNextPage: boolean;
+  };
+} {
+  if (data.length == 0) {
+    return {
+      data: [],
+      metaData: {
+        lastCursor: null,
+        hasNextPage: false,
+      },
+    };
+  }
+
+  const lastCursor = data[data.length - 1].id;
+
+  return {
+    data: data.slice(0, query.take),
+    metaData: {
+      lastCursor,
+      hasNextPage: data.length > query.take,
+    },
+  };
+}
