@@ -8,6 +8,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@ultra-market/ui/select';
+import { Clipboard } from 'lucide-react';
+import { Button } from '@ultra-market/ui/button';
+import { toast } from 'sonner';
+import Link from 'next/link';
 
 type OrderProps = {
   order: Stripe.Checkout.Session;
@@ -25,7 +29,18 @@ const Order: React.FC<OrderProps> = ({ order, updateStatus, edit }) => {
     <div className="p-4 border border-gray-300 rounded-md mb-4">
       <h3 className="text-lg font-semibold">
         Rendelés azonosítója:{' '}
-        <span aria-label={id}>{id.slice(0, 10) + '...'}</span>
+        <span aria-label={id}>
+          {id.split('_')[2].slice(0, 10) + '...'}{' '}
+          <Button
+            onClick={() => {
+              navigator.clipboard.writeText(id);
+              toast('Az azonosító másolva a vágólapra');
+            }}
+            className="p-0 h-full transition-all text-orange-400 bg-transparent hover:text-green-600 hover:bg-transparent"
+          >
+            <Clipboard className="h-5" />
+          </Button>{' '}
+        </span>
       </h3>
       <p>
         <strong>Vásárló neve:</strong> {customer_details?.name}
@@ -74,10 +89,18 @@ const Order: React.FC<OrderProps> = ({ order, updateStatus, edit }) => {
         {!edit && <span>{translateStatus((order as any).orderStatus)}</span>}
       </div>
       <h4 className="mt-2 mb-1 font-semibold">Termékek:</h4>
-      <ul className="list-disc list-inside">
+      <ul className="pl-4">
         {line_items?.data.map((item) => (
           <li key={item.id}>
-            {(item.price?.product as Stripe.Product).name} - ${item.quantity} x{' '}
+            <Link
+              href={`/item/${
+                (item.price?.product as Stripe.Product).metadata.id
+              }`}
+              className="text-blue-500 hover:underline transition-all"
+            >
+              {(item.price?.product as Stripe.Product).name}{' '}
+            </Link>{' '}
+            - ${item.quantity} x{' '}
             {formatAmountForDisplay(item.price!.unit_amount! / 100, 'HUF')}
           </li>
         ))}

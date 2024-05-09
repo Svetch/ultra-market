@@ -160,7 +160,6 @@ app.get('/org/item', async (ctx) => {
     return ctx.json({ error: 'Unauthorized' }, 401);
   }
 
-
   const items = await DB.shopItem.findMany({
     where: {
       organizationId: org.id,
@@ -533,14 +532,14 @@ app.get('/me/orders', async (ctx) => {
         where: {
           userId: auth.userId,
         },
-        select: { id: true },
+        select: { id: true, orderStatus: true },
       })
-    ).map(
-      async (order) =>
-        await stripe.checkout.sessions.retrieve(order.id, {
-          expand: ['line_items', 'line_items.data.price.product'],
-        })
-    )
+    ).map(async (order) => ({
+      ...(await stripe.checkout.sessions.retrieve(order.id, {
+        expand: ['line_items', 'line_items.data.price.product'],
+      })),
+      orderStatus: order.orderStatus,
+    }))
   );
   return ctx.json(paginate({ take: 10 }, orders));
 });
