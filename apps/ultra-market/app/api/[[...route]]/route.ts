@@ -10,23 +10,20 @@ export const dynamic = 'force-dynamic';
 
 type Environment = {
   DB: () => PrismaClient;
-  stripe: Stripe;
-  STRIPE_SECRET_KEY: string;
 };
 
 const app = new Hono<{ Bindings: Environment }>().basePath('/api');
 
-const stripe =
-  //init prisma
-  app.use(async (ctx, next) => {
-    console.log(ctx.env);
-    ctx.env.stripe = new Stripe(ctx.env.STRIPE_SECRET_KEY, {
-      typescript: true,
-      apiVersion: '2024-04-10',
-    });
-    ctx.env.DB = createDbConnection;
-    await next();
-  });
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  typescript: true,
+  apiVersion: '2024-04-10',
+});
+
+//init prisma
+app.use(async (ctx, next) => {
+  ctx.env.DB = createDbConnection;
+  await next();
+});
 app.use('*', clerkMiddleware());
 
 app.get('/search', async (ctx, e) => {
@@ -262,6 +259,7 @@ app.get('/org/orders', async (ctx) => {
   if (!auth?.orgId) {
     return ctx.json({ error: 'Unauthorized' }, 401);
   }
+  stripe.checkout.sessions.list({ limit: 100 });
   const orders = await Promise.all(
     (
       await DB.order.findMany({
@@ -281,7 +279,7 @@ app.get('/org/orders', async (ctx) => {
       })
     ).map(async (order) => {
       return {
-        ...(await ctx.env.stripe.checkout.sessions.retrieve(order.id, {
+        ...(await stripe.checkout.sessions.retrieve(order.id, {
           expand: ['line_items', 'line_items.data.price.product'],
         })),
         orderStatus: order.orderStatus,
@@ -359,7 +357,7 @@ app.post('/checkout_sessions', async (ctx) => {
     success_url: `${ctx.req.header('origin')}/api/result/{CHECKOUT_SESSION_ID}`,
     cancel_url: `${ctx.req.header('origin')}/api/result/{CHECKOUT_SESSION_ID}`,
   };
-  const checkoutSession = await ctx.env.stripe.checkout.sessions.create(params);
+  const checkoutSession = await stripe.checkout.sessions.create(params);
 
   const order = await DB.order.create({
     data: {
@@ -408,9 +406,7 @@ app.get('/result/:id', async (ctx) => {
   if (!auth || auth?.userId === null) {
     return ctx.json({ error: 'Unauthorized' }, 401);
   }
-  const session = await ctx.env.stripe.checkout.sessions.retrieve(
-    ctx.req.param('id')
-  );
+  const session = await stripe.checkout.sessions.retrieve(ctx.req.param('id'));
   const order = await DB.order.update({
     where: {
       id: session.id,
@@ -430,7 +426,7 @@ app.get('/result/:id', async (ctx) => {
     },
   });
   if (session.status == 'open')
-    await ctx.env.stripe.checkout.sessions.expire(session.id);
+    await stripe.checkout.sessions.expire(session.id);
   return ctx.redirect(`/payment/${session.id}`);
 });
 
@@ -448,12 +444,9 @@ app.get('/payment/:id', async (ctx) => {
       },
     },
   }); */
-  const payment = await ctx.env.stripe.checkout.sessions.retrieve(
-    ctx.req.param('id'),
-    {
-      expand: ['line_items', 'line_items.data.price.product'],
-    }
-  );
+  const payment = await stripe.checkout.sessions.retrieve(ctx.req.param('id'), {
+    expand: ['line_items', 'line_items.data.price.product'],
+  });
   if (!payment) return ctx.json({ error: 'Not found' }, 404);
   return ctx.json(payment);
 });
@@ -502,7 +495,7 @@ app.get('/me/orders', async (ctx) => {
       })
     ).map(
       async (order) =>
-        await ctx.env.stripe.checkout.sessions.retrieve(order.id, {
+        await stripe.checkout.sessions.retrieve(order.id, {
           expand: ['line_items', 'line_items.data.price.product'],
         })
     )
