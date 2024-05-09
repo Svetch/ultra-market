@@ -1,10 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import { Hono } from 'hono';
-import { handle } from 'hono/vercel';
 import { createDbConnection } from './db';
 import { clerkMiddleware } from '@hono/clerk-auth';
 import Stripe from 'stripe';
 import { formatAmountForStripe } from '../../../utils/stripe-helpers';
+import { NextRequest } from 'next/server';
+import { FetchEventLike } from 'hono/types';
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
@@ -259,7 +260,6 @@ app.get('/org/orders', async (ctx) => {
   if (!auth?.orgId) {
     return ctx.json({ error: 'Unauthorized' }, 401);
   }
-  stripe.checkout.sessions.list({ limit: 100 });
   const orders = await Promise.all(
     (
       await DB.order.findMany({
@@ -502,6 +502,12 @@ app.get('/me/orders', async (ctx) => {
   );
   return ctx.json(orders);
 });
+
+const handle =
+  (app: Hono<any, any, any>) =>
+  (req: Request, requestContext: FetchEventLike) => {
+    return app.fetch(req, process.env, requestContext);
+  };
 
 export const GET = handle(app);
 export const POST = handle(app);
