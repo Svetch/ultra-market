@@ -252,6 +252,7 @@ const Navbar: React.FC<NavbarProps> = ({ items, logo }) => {
                           <span className="font-medium">{product.name}</span>
                           <div className="ml-auto mr-4 p-1 flex flex-row">
                             <Button
+                              type="button"
                               className="p-1 h-auto"
                               onClick={() => removeOneFromCart(product)}
                             >
@@ -272,6 +273,7 @@ const Navbar: React.FC<NavbarProps> = ({ items, logo }) => {
                               }}
                             ></Input>
                             <Button
+                              type="button"
                               onClick={() => addToCart(product)}
                               className="p-1 h-auto"
                             >

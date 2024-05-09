@@ -1,68 +1,85 @@
 import React from 'react';
-
-type Product = {
-    productId: number;
-    productName: string;
-    productPrice: number;
-    productAmount: number;
-};
+import Stripe from 'stripe';
+import { formatAmountForDisplay } from '../utils/stripe-helpers';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@ultra-market/ui/select';
 
 type OrderProps = {
-    orderId: number;
-    customerName: string;
-    shippingAddress: string;
-    customerPhone: string;
-    date: string;
-    status: string;
-    products: Product[];
-    updateStatus: (orderId: number, status: string) => void;
+  order: Stripe.Checkout.Session;
+  updateStatus: (orderId: string, status: string) => void;
 };
 
-const Order: React.FC<OrderProps> = ({
-    orderId,
-    customerName,
-    shippingAddress,
-    customerPhone,
-    date,
-    status,
-    products,
-    updateStatus,
-}) => {
-    const handleStatusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        const newStatus = event.target.value;
-        updateStatus(orderId, newStatus);
-    };
+const Order: React.FC<OrderProps> = ({ order, updateStatus }) => {
+  const handleStatusChange = (value: string) => {
+    updateStatus(order.id, value);
+  };
+  const { id, customer_details, shipping_details, created, line_items } = order;
 
-    return (
-        <div className="p-4 border border-gray-300 rounded-md mb-4">
-            <h3 className="text-lg font-semibold">Rendelés azonosítója: {orderId}</h3>
-            <p><strong>Vásárló neve:</strong> {customerName}</p>
-            <p><strong>Cím:</strong> {shippingAddress}</p>
-            <p><strong>Telefon:</strong> {customerPhone}</p>
-            <p><strong>Rendelés ideje:</strong> {new Date(date).toLocaleString('hu-HU')}</p>
-            <p><strong>Állapot:</strong>
-                <select
-                value={status}
-                onChange={handleStatusChange}
-                className="ml-2 border border-gray-300 rounded"
-                >
-                <option value="Pending">Függőben</option>
-                <option value="Packaging">Csomagolás</option>
-                <option value="Shipping">Szállítás</option>
-                <option value="Delivered">Kézbesített</option>
-                <option value="Canceled">Törölve</option>
-                </select>
-            </p>
-            <h4 className="mt-2 mb-1 font-semibold">Termékek:</h4>
-            <ul className="list-disc list-inside">
-                {products.map((product) => (
-                <li key={product.productId}>
-                    {product.productName} - ${product.productPrice.toFixed(2)} x {product.productAmount}
-                </li>
-                ))}
-            </ul>
-        </div>
-    );
+  return (
+    <div className="p-4 border border-gray-300 rounded-md mb-4">
+      <h3 className="text-lg font-semibold">Rendelés azonosítója: {id}</h3>
+      <p>
+        <strong>Vásárló neve:</strong> {customer_details?.name}
+      </p>
+      <p>
+        <strong>Cím:</strong> {shipping_details?.address?.country}{' '}
+        {shipping_details?.address?.postal_code}{' '}
+        {shipping_details?.address?.state} {shipping_details?.address?.city}{' '}
+        {shipping_details?.address?.line1} {shipping_details?.address?.line2}
+      </p>
+      <p>
+        <strong>Telefon:</strong> {customer_details?.phone}
+      </p>
+      <p>
+        <strong>Rendelés ideje:</strong>{' '}
+        {new Date(created * 1000).toLocaleString('hu-HU')}
+      </p>
+      <p>
+        <strong>Fizetési Állapot:</strong>{' '}
+        {order.payment_status === 'paid' ? 'Fizetve' : 'Fizetésre vár'}
+      </p>
+
+      <div className="flex flex-row gap-4 items-center py-1">
+        <strong>Állapot:</strong>
+        <Select
+          value={(order as any).orderStatus}
+          onValueChange={handleStatusChange}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Állapot" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="WaitingForPayment" disabled>
+              Fizetés Alatt
+            </SelectItem>
+            <SelectItem value="Pending">Függőben</SelectItem>
+            <SelectItem value="Packiging">Csomagolás</SelectItem>
+            <SelectItem value="Shipping">Szállítás</SelectItem>
+            <SelectItem value="Delivered">Kézbesített</SelectItem>
+            <SelectItem value="Canceled">Törölve</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <h4 className="mt-2 mb-1 font-semibold">Termékek:</h4>
+      <ul className="list-disc list-inside">
+        {line_items?.data.map((item) => (
+          <li key={item.id}>
+            {(item.price?.product as Stripe.Product).name} - ${item.quantity} x{' '}
+            {formatAmountForDisplay(item.price!.unit_amount! / 100, 'HUF')}
+          </li>
+        ))}
+      </ul>
+      <p>
+        <strong>Összesen:</strong>{' '}
+        {formatAmountForDisplay(order.amount_total! / 100, 'HUF')}
+      </p>
+    </div>
+  );
 };
 
 export default Order;

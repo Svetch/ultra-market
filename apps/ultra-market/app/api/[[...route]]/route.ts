@@ -130,6 +130,8 @@ app.get('/item/:id', async (ctx) => {
       images: true,
       description: true,
       organizationId: true,
+      stock: true,
+      shortDescription: true,
       categories: {
         select: {
           name: true,
@@ -142,16 +144,14 @@ app.get('/item/:id', async (ctx) => {
   return ctx.json(item);
 });
 
-app.get('/organization/:id/item', async (ctx) => {
+app.get('/org/item', async (ctx) => {
   const DB = ctx.env.DB();
-  const id = ctx.req.param('id');
   const auth = ctx.get('clerkAuth');
-  if (!id || auth?.orgId !== ctx.req.param('id'))
-    return ctx.json({ error: 'Unauthorized' }, 401);
+  if (!auth?.orgId) return ctx.json({ error: 'Unauthorized' }, 401);
 
   const items = await DB.shopItem.findMany({
     where: {
-      organizationId: id,
+      organizationId: auth?.orgId,
     },
     select: {
       id: true,
@@ -171,19 +171,17 @@ app.get('/organization/:id/item', async (ctx) => {
   return ctx.json(items);
 });
 
-app.patch('/organization/:id/item/:itemId', async (ctx) => {
+app.patch('/org/item/:itemId', async (ctx) => {
   const DB = ctx.env.DB();
-  const id = parseInt(ctx.req.param('id'));
   const itemId = parseInt(ctx.req.param('itemId'));
   const auth = ctx.get('clerkAuth');
-  if (auth?.orgId !== ctx.req.param('id'))
-    return ctx.json({ error: 'Unauthorized' }, 401);
-  if (isNaN(id)) return ctx.json({ error: 'Invalid id' }, 400);
+  if (!auth?.orgId) return ctx.json({ error: 'Unauthorized' }, 401);
 
   const body = await ctx.req.json();
   const item = await DB.shopItem.update({
     where: {
       id: itemId,
+      organizationId: auth.orgId,
     },
     data: {
       name: body.name,
@@ -199,6 +197,120 @@ app.patch('/organization/:id/item/:itemId', async (ctx) => {
   });
 
   return ctx.json(item);
+});
+
+app.post('/org/item', async (ctx) => {
+  const DB = ctx.env.DB();
+  const auth = ctx.get('clerkAuth');
+  if (!auth || !auth?.userId || !auth.orgId) {
+    return ctx.json({ error: 'Unauthorized' }, 401);
+  }
+  const body = await ctx.req.json();
+  console.log(body);
+
+  const item = await DB.shopItem.create({
+    data: {
+      name: body.name,
+      price: body.price,
+      description: body.description,
+      images: body.images,
+      organization: {
+        connectOrCreate: {
+          where: {
+            id: auth.orgId,
+          },
+          create: {
+            id: auth.orgId,
+            owner: {
+              connectOrCreate: {
+                where: {
+                  id: auth.userId,
+                },
+                create: {
+                  id: auth.userId,
+                },
+              },
+            },
+          },
+        },
+      },
+      shortDescription: body.shortDescription,
+      stock: body.stock,
+      categories: {
+        connectOrCreate: body.categories.map((name: string) => ({
+          where: {
+            name,
+          },
+          create: {
+            name,
+          },
+        })),
+      },
+    },
+  });
+
+  return ctx.json(item);
+});
+
+app.get('/org/orders', async (ctx) => {
+  const DB = ctx.env.DB();
+  const { cursor } = ctx.req.query();
+  const auth = ctx.get('clerkAuth');
+  if (!auth?.orgId) {
+    return ctx.json({ error: 'Unauthorized' }, 401);
+  }
+  stripe.checkout.sessions.list({ limit: 100 });
+  const orders = await Promise.all(
+    (
+      await DB.order.findMany({
+        ...(cursor && {
+          cursor: {
+            id: cursor,
+          },
+        }),
+        take: 11,
+        select: {
+          id: true,
+          orderStatus: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      })
+    ).map(async (order) => {
+      return {
+        ...(await stripe.checkout.sessions.retrieve(order.id, {
+          expand: ['line_items', 'line_items.data.price.product'],
+        })),
+        orderStatus: order.orderStatus,
+      };
+    })
+  );
+  return ctx.json(paginate({ take: 10 }, orders));
+});
+
+app.patch('/org/orders/:id', async (ctx) => {
+  const DB = ctx.env.DB();
+  const auth = ctx.get('clerkAuth');
+  if (!auth?.orgId) {
+    return ctx.json({ error: 'Unauthorized' }, 401);
+  }
+  const body = await ctx.req.json();
+  if (
+    !['Pending', 'Packiging', 'Shipping', 'Delivered', 'Canceled'].includes(
+      body.status
+    )
+  )
+    return ctx.json({ error: 'Invalid status' }, 400);
+  const order = await DB.order.update({
+    where: {
+      id: ctx.req.param('id'),
+    },
+    data: {
+      orderStatus: body.status,
+    },
+  });
+  return ctx.json(order);
 });
 
 app.post('/checkout_sessions', async (ctx) => {
@@ -308,7 +420,7 @@ app.get('/result/:id', async (ctx) => {
         session.shipping_details?.address?.line2,
       city: session.shipping_details?.address?.city,
       country: session.shipping_details?.address?.country,
-      phone: session.shipping_details?.phone,
+      phone: session.customer_details?.phone,
       zip: session.shipping_details?.address?.postal_code,
       name: session.shipping_details?.name,
     },
@@ -391,61 +503,11 @@ app.get('/me/orders', async (ctx) => {
   return ctx.json(orders);
 });
 
-app.post('/item', async (ctx) => {
-  const DB = ctx.env.DB();
-  const auth = ctx.get('clerkAuth');
-  if (!auth || !auth?.userId || !auth.orgId) {
-    return ctx.json({ error: 'Unauthorized' }, 401);
-  }
-  const body = await ctx.req.json();
-  console.log(body);
-
-  const item = await DB.shopItem.create({
-    data: {
-      name: body.name,
-      price: body.price,
-      description: body.description,
-      images: body.images,
-      organization: {
-        connectOrCreate: {
-          where: {
-            id: auth.orgId,
-          },
-          create: {
-            id: auth.orgId,
-            owner: {
-              connectOrCreate: {
-                where: {
-                  id: auth.userId,
-                },
-                create: {
-                  id: auth.userId,
-                },
-              },
-            },
-          },
-        },
-      },
-      shortDescription: body.shortDescription,
-      stock: body.stock,
-      categories: {
-        connectOrCreate: body.categories.map((name: string) => ({
-          where: {
-            name,
-          },
-          create: {
-            name,
-          },
-        })),
-      },
-    },
-  });
-
-  return ctx.json(item);
-});
-
 export const GET = handle(app);
 export const POST = handle(app);
+export const PATCH = handle(app);
+export const DELETE = handle(app);
+export const PUT = handle(app);
 
 export function paginate<T extends { id: number | string }>(
   query: {

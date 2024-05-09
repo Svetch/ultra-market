@@ -68,28 +68,30 @@ const SearchItem: React.FC<SearchItemProps> = ({
         </CardContent>
         <CardFooter className="flex justify-between">
           <p className="text-lg">{price.toFixed(2)} Ft</p>
-          <Button
-            onClick={() => {
-              addToCart({
-                categories: [],
-                description: '',
-                id,
-                images: [imageUrl],
-                name: itemName,
-                price,
-              });
-              toast('Sikeresen hozzáadtál egy terméket a korárhoz', {
-                action: {
-                  label: 'Kosárhoz',
-                  onClick: openCart,
-                },
-                duration: 3000,
-              });
-            }}
-            className="transition-all hover:scale-105"
-          >
-            <ShoppingCart />
-          </Button>
+          {!edit && (
+            <Button
+              onClick={() => {
+                addToCart({
+                  categories: [],
+                  description: '',
+                  id,
+                  images: [imageUrl],
+                  name: itemName,
+                  price,
+                });
+                toast('Sikeresen hozzáadtál egy terméket a korárhoz', {
+                  action: {
+                    label: 'Kosárhoz',
+                    onClick: openCart,
+                  },
+                  duration: 3000,
+                });
+              }}
+              className="transition-all hover:scale-105"
+            >
+              <ShoppingCart />
+            </Button>
+          )}
         </CardFooter>
       </Card>
     </motion.div>

@@ -8,7 +8,7 @@ const App: React.FC = () => {
       <AddItemPage
         onSubmit={async (data) => {
           console.log('Form submitted:', data);
-          const item = await fetch('/api/item', {
+          const item = await fetch('/api/org/item', {
             body: JSON.stringify(data),
             method: 'post',
           });
