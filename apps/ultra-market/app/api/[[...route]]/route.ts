@@ -509,7 +509,7 @@ export const PATCH = handle(app);
 export const DELETE = handle(app);
 export const PUT = handle(app);
 
-export function paginate<T extends { id: number | string }>(
+function paginate<T extends { id: number | string }>(
   query: {
     take: number;
   },
