@@ -148,11 +148,22 @@ app.get('/item/:id', async (ctx) => {
 app.get('/org/item', async (ctx) => {
   const DB = ctx.env.DB();
   const auth = ctx.get('clerkAuth');
-  if (!auth?.orgId) return ctx.json({ error: 'Unauthorized' }, 401);
+  if (!auth?.userId) {
+    return ctx.json({ error: 'Unauthorized' }, 401);
+  }
+  const clerk = ctx.get('clerk');
+  const orgs = await clerk.users.getOrganizationMembershipList({
+    userId: auth.userId,
+  });
+  const org = orgs.data[0]?.organization;
+  if (!org) {
+    return ctx.json({ error: 'Unauthorized' }, 401);
+  }
+
 
   const items = await DB.shopItem.findMany({
     where: {
-      organizationId: auth?.orgId,
+      organizationId: org.id,
     },
     select: {
       id: true,
@@ -176,13 +187,23 @@ app.patch('/org/item/:itemId', async (ctx) => {
   const DB = ctx.env.DB();
   const itemId = parseInt(ctx.req.param('itemId'));
   const auth = ctx.get('clerkAuth');
-  if (!auth?.orgId) return ctx.json({ error: 'Unauthorized' }, 401);
+  if (!auth?.userId) {
+    return ctx.json({ error: 'Unauthorized' }, 401);
+  }
+  const clerk = ctx.get('clerk');
+  const orgs = await clerk.users.getOrganizationMembershipList({
+    userId: auth.userId,
+  });
+  const org = orgs.data[0]?.organization;
+  if (!org) {
+    return ctx.json({ error: 'Unauthorized' }, 401);
+  }
 
   const body = await ctx.req.json();
   const item = await DB.shopItem.update({
     where: {
       id: itemId,
-      organizationId: auth.orgId,
+      organizationId: org.id,
     },
     data: {
       name: body.name,
@@ -203,11 +224,18 @@ app.patch('/org/item/:itemId', async (ctx) => {
 app.post('/org/item', async (ctx) => {
   const DB = ctx.env.DB();
   const auth = ctx.get('clerkAuth');
-  if (!auth || !auth?.userId || !auth.orgId) {
+  if (!auth?.userId) {
+    return ctx.json({ error: 'Unauthorized' }, 401);
+  }
+  const clerk = ctx.get('clerk');
+  const orgs = await clerk.users.getOrganizationMembershipList({
+    userId: auth.userId,
+  });
+  const org = orgs.data[0]?.organization;
+  if (!org) {
     return ctx.json({ error: 'Unauthorized' }, 401);
   }
   const body = await ctx.req.json();
-  console.log(body);
 
   const item = await DB.shopItem.create({
     data: {
@@ -218,10 +246,10 @@ app.post('/org/item', async (ctx) => {
       organization: {
         connectOrCreate: {
           where: {
-            id: auth.orgId,
+            id: org.id,
           },
           create: {
-            id: auth.orgId,
+            id: org.id,
             owner: {
               connectOrCreate: {
                 where: {
@@ -257,7 +285,15 @@ app.get('/org/orders', async (ctx) => {
   const DB = ctx.env.DB();
   const { cursor } = ctx.req.query();
   const auth = ctx.get('clerkAuth');
-  if (!auth?.orgId) {
+  if (!auth?.userId) {
+    return ctx.json({ error: 'Unauthorized' }, 401);
+  }
+  const clerk = ctx.get('clerk');
+  const orgs = await clerk.users.getOrganizationMembershipList({
+    userId: auth.userId,
+  });
+  const org = orgs.data[0]?.organization;
+  if (!org) {
     return ctx.json({ error: 'Unauthorized' }, 401);
   }
   const orders = await Promise.all(
@@ -268,6 +304,13 @@ app.get('/org/orders', async (ctx) => {
             id: cursor,
           },
         }),
+        where: {
+          items: {
+            some: {
+              organizationId: org.id,
+            },
+          },
+        },
         take: 11,
         select: {
           id: true,
@@ -292,7 +335,15 @@ app.get('/org/orders', async (ctx) => {
 app.patch('/org/orders/:id', async (ctx) => {
   const DB = ctx.env.DB();
   const auth = ctx.get('clerkAuth');
-  if (!auth?.orgId) {
+  if (!auth?.userId) {
+    return ctx.json({ error: 'Unauthorized' }, 401);
+  }
+  const clerk = ctx.get('clerk');
+  const orgs = await clerk.users.getOrganizationMembershipList({
+    userId: auth.userId,
+  });
+  const org = orgs.data[0]?.organization;
+  if (!org) {
     return ctx.json({ error: 'Unauthorized' }, 401);
   }
   const body = await ctx.req.json();
@@ -305,6 +356,11 @@ app.patch('/org/orders/:id', async (ctx) => {
   const order = await DB.order.update({
     where: {
       id: ctx.req.param('id'),
+      items: {
+        some: {
+          organizationId: org.id,
+        },
+      },
     },
     data: {
       orderStatus: body.status,
@@ -371,23 +427,6 @@ app.post('/checkout_sessions', async (ctx) => {
           },
           create: {
             id: auth.userId,
-            ...(auth.orgId
-              ? {
-                  Organization: {
-                    connectOrCreate: {
-                      where: {
-                        id: auth.orgId,
-                        ownerId: auth.userId,
-                      },
-                      create: {
-                        id: auth.orgId,
-                      },
-                    },
-                  },
-                }
-              : {
-                  Organization: {},
-                }),
           },
         },
       },
@@ -407,6 +446,7 @@ app.get('/result/:id', async (ctx) => {
     return ctx.json({ error: 'Unauthorized' }, 401);
   }
   const session = await stripe.checkout.sessions.retrieve(ctx.req.param('id'));
+  if (!session) return ctx.json({ error: 'Not found' }, 404);
   const order = await DB.order.update({
     where: {
       id: session.id,
@@ -425,8 +465,11 @@ app.get('/result/:id', async (ctx) => {
       name: session.shipping_details?.name,
     },
   });
-  if (session.status == 'open')
+  if (session.status == 'open') {
     await stripe.checkout.sessions.expire(session.id);
+    return ctx.redirect(`/search`);
+  }
+
   return ctx.redirect(`/payment/${session.id}`);
 });
 
@@ -436,14 +479,6 @@ app.get('/payment/:id', async (ctx) => {
   if (!auth || auth?.userId === null) {
     return ctx.json({ error: 'Unauthorized' }, 401);
   }
-  /*   const payment = await DB.payment.findUnique({
-    where: {
-      id: ctx.req.param('id'),
-      order: {
-        userId: auth.userId,
-      },
-    },
-  }); */
   const payment = await stripe.checkout.sessions.retrieve(ctx.req.param('id'), {
     expand: ['line_items', 'line_items.data.price.product'],
   });
@@ -481,6 +516,7 @@ app.get('/price-range', async (ctx) => {
 
 app.get('/me/orders', async (ctx) => {
   const DB = ctx.env.DB();
+  const { cursor } = ctx.req.query();
   const auth = ctx.get('clerkAuth');
   if (!auth || auth?.userId === null) {
     return ctx.json({ error: 'Unauthorized' }, 401);
@@ -488,6 +524,12 @@ app.get('/me/orders', async (ctx) => {
   const orders = await Promise.all(
     (
       await DB.order.findMany({
+        ...(cursor && {
+          cursor: {
+            id: cursor,
+          },
+        }),
+        take: 11,
         where: {
           userId: auth.userId,
         },
@@ -500,7 +542,7 @@ app.get('/me/orders', async (ctx) => {
         })
     )
   );
-  return ctx.json(orders);
+  return ctx.json(paginate({ take: 10 }, orders));
 });
 
 const handle =

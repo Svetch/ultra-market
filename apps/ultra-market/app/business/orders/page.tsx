@@ -86,7 +86,7 @@ const OrdersPage: React.FC = () => {
         pagesData
           .flatMap((page) => page.data)
           .map((order) => (
-            <Order key={order.id} order={order} updateStatus={updateStatus} />
+            <Order key={order.id} order={order} edit={true} updateStatus={updateStatus} />
           ))}
       {pagesData &&
         !isLoading &&
