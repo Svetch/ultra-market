@@ -3,6 +3,7 @@ import React from 'react';
 import EditableProductPage from '../../../../components/edit-item';
 import { fetcher } from '../../../../utils/fetcher';
 import useSWR from 'swr';
+import { toast } from 'sonner';
 
 export default function ParentComponent({
   params,
@@ -12,7 +13,6 @@ export default function ParentComponent({
   const { data: product } = useSWR(`/api/item/${params.id}`, fetcher);
 
   if (!product) return <div>Loading...</div>;
-  console.log(product);
 
   return (
     <div className="container mx-auto bg-neutral-800 rounded p-5 my-10">
@@ -23,8 +23,14 @@ export default function ParentComponent({
           ...product,
           categories: product.categories.map((c: any) => c.name),
         }}
-        onSave={(updatedProduct) => {
-          console.log('Product has been saved:', updatedProduct);
+        onSave={async (updatedProduct) => {
+          const result = await fetch(`/api/org/item/${params.id}`, {
+            method: 'PATCH',
+            body: JSON.stringify(updatedProduct),
+          });
+          if (result.ok) {
+            toast.success('Az áru sikeresen frissítve lett.');
+          } else toast.error('Hiba történt az áru frissítése közben.');
         }}
       />
     </div>

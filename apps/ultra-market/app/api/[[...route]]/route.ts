@@ -20,7 +20,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-04-10',
 });
 
-
 //init prisma
 app.use(async (ctx, next) => {
   ctx.env.DB = createDbConnection;
@@ -200,6 +199,21 @@ app.patch('/org/item/:itemId', async (ctx) => {
   }
 
   const body = await ctx.req.json();
+
+  await Promise.all(
+    body.categories.map(async (name: string) => {
+      await DB.category.upsert({
+        where: {
+          name,
+        },
+        create: {
+          name,
+        },
+        update: {},
+      });
+    })
+  );
+
   const item = await DB.shopItem.update({
     where: {
       id: itemId,
@@ -210,10 +224,25 @@ app.patch('/org/item/:itemId', async (ctx) => {
       price: body.price,
       description: body.description,
       images: body.images,
+      stock: body.stock,
+      shortDescription: body.shortDescription,
       categories: {
-        set: body.categories.map((id: number) => ({
-          id,
+        set: body.categories.map((name: string) => ({
+          name,
         })),
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+      price: true,
+      images: true,
+      description: true,
+      categories: {
+        select: {
+          name: true,
+          id: true,
+        },
       },
     },
   });
