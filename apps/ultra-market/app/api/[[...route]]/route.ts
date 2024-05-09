@@ -19,10 +19,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   typescript: true,
   apiVersion: '2024-04-10',
 });
-const DB = createDbConnection();
+
 //init prisma
 app.use(async (ctx, next) => {
-  ctx.env.DB = () => DB;
+  ctx.env.DB = createDbConnection;
   await next();
 });
 app.use('*', clerkMiddleware());
