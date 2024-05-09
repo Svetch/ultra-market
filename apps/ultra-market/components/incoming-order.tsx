@@ -49,6 +49,7 @@ const Order: React.FC<OrderProps> = ({ order, updateStatus }) => {
         <Select
           value={(order as any).orderStatus}
           onValueChange={handleStatusChange}
+          disabled={(order as any).orderStatus === 'WaitingForPayment'}
         >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Állapot" />
