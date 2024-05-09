@@ -52,8 +52,6 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ items, logo }) => {
-  const [openSearch, setOpenSearch] = useState(false);
-
   const [cartState, setCartState] = useState<Product[]>([]);
 
   const formatter = new Intl.NumberFormat('hu-HU', {
@@ -158,55 +156,7 @@ const Navbar: React.FC<NavbarProps> = ({ items, logo }) => {
       </Sheet>
 
       <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
-        <div className="ml-auto flex-1 sm:flex-initial">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search products..."
-              className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
-              onClick={() => setOpenSearch(true)}
-            />
-          </div>
-        </div>
-        <CommandDialog open={openSearch} onOpenChange={setOpenSearch}>
-          <CommandInput placeholder="Type a command or search..." />
-          <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup heading="Suggestions">
-              <CommandItem>
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                <span>Calendar</span>
-              </CommandItem>
-              <CommandItem>
-                <FaceIcon className="mr-2 h-4 w-4" />
-                <span>Search Emoji</span>
-              </CommandItem>
-              <CommandItem>
-                <RocketIcon className="mr-2 h-4 w-4" />
-                <span>Launch</span>
-              </CommandItem>
-            </CommandGroup>
-            <CommandSeparator />
-            <CommandGroup heading="Settings">
-              <CommandItem>
-                <PersonIcon className="mr-2 h-4 w-4" />
-                <span>Profile</span>
-                <CommandShortcut>⌘P</CommandShortcut>
-              </CommandItem>
-              <CommandItem>
-                <EnvelopeClosedIcon className="mr-2 h-4 w-4" />
-                <span>Mail</span>
-                <CommandShortcut>⌘B</CommandShortcut>
-              </CommandItem>
-              <CommandItem>
-                <GearIcon className="mr-2 h-4 w-4" />
-                <span>Settings</span>
-                <CommandShortcut>⌘S</CommandShortcut>
-              </CommandItem>
-            </CommandGroup>
-          </CommandList>
-        </CommandDialog>
+        <div className="ml-auto flex-1 sm:flex-initial"></div>
         <Sheet
           open={cartOpen}
           onOpenChange={(open) => {
