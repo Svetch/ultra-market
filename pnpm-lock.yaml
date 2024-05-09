@@ -8,6 +8,9 @@ dependencies:
   '@baselime/edge-logger':
     specifier: ^0.3.2
     version: 0.3.2
+  '@clerk/backend':
+    specifier: ^1.1.2
+    version: 1.1.2(react-dom@18.2.0)(react@18.2.0)
   '@clerk/localizations':
     specifier: 2.0.0-beta.24
     version: 2.0.0-beta.24(react-dom@18.2.0)(react@18.2.0)
@@ -23,6 +26,9 @@ dependencies:
   '@faker-js/faker':
     specifier: ^8.4.1
     version: 8.4.1
+  '@hono/clerk-auth':
+    specifier: ^2.0.0
+    version: 2.0.0(@clerk/backend@1.1.2)(hono@4.2.6)
   '@mantine/hooks':
     specifier: ^7.8.0
     version: 7.8.0(react@18.2.0)
@@ -71,6 +77,12 @@ dependencies:
   '@radix-ui/react-slot':
     specifier: ^1.0.2
     version: 1.0.2(@types/react@18.2.33)(react@18.2.0)
+  '@stripe/react-stripe-js':
+    specifier: ^2.7.1
+    version: 2.7.1(@stripe/stripe-js@3.4.0)(react-dom@18.2.0)(react@18.2.0)
+  '@stripe/stripe-js':
+    specifier: ^3.4.0
+    version: 3.4.0
   '@vercel/otel':
     specifier: ^1.8.1
     version: 1.8.1(@opentelemetry/api-logs@0.46.0)(@opentelemetry/api@1.6.0)(@opentelemetry/instrumentation@0.46.0)(@opentelemetry/resources@1.23.0)(@opentelemetry/sdk-logs@0.46.0)(@opentelemetry/sdk-metrics@1.23.0)(@opentelemetry/sdk-trace-base@1.23.0)
@@ -128,6 +140,9 @@ dependencies:
   sonner:
     specifier: ^1.4.41
     version: 1.4.41(react-dom@18.2.0)(react@18.2.0)
+  stripe:
+    specifier: ^15.5.0
+    version: 15.5.0
   swr:
     specifier: ^2.2.5
     version: 2.2.5(react@18.2.0)
@@ -1549,6 +1564,19 @@ packages:
       - react-dom
     dev: false
 
+  /@clerk/backend@1.1.2(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-WWq7sRQ6UVQgpOrX4AgT4MsxLWFY+UqQ308yl3SYuLKHJhltXJ2p/NBu31V7tzb45QCejMbqlk91dXgA8QvI5A==}
+    engines: {node: '>=18.17.0'}
+    dependencies:
+      '@clerk/shared': 2.0.2(react-dom@18.2.0)(react@18.2.0)
+      cookie: 0.5.0
+      snakecase-keys: 5.4.4
+      tslib: 2.4.1
+    transitivePeerDependencies:
+      - react
+      - react-dom
+    dev: false
+
   /@clerk/clerk-react@5.0.0-beta.41(eslint@8.57.0)(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.5):
     resolution: {integrity: sha512-RngfMgzlhJU6ipqpNe0c2LtjhW/48mhc8QMQRSFOcVcoEwbi2QcEAGg6OoZhZz5gh+vasyn6DCrVbGIlvdsEfQ==}
     engines: {node: '>=18.17.0'}
@@ -1606,6 +1634,27 @@ packages:
 
   /@clerk/shared@2.0.0-beta.23(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-eiEKbTJwSetYaHGfiijxB3BCxudaJ4jSkblB88rFvq4hJsajtFOh7F7KpNCahTuxvbsb+gXXerMKZUMI7FYoFw==}
+    engines: {node: '>=18.17.0'}
+    requiresBuild: true
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
+    dependencies:
+      glob-to-regexp: 0.4.1
+      js-cookie: 3.0.1
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      std-env: 3.7.0
+      swr: 2.2.0(react@18.2.0)
+    dev: false
+
+  /@clerk/shared@2.0.2(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-uQXbBJyUV6B4y/cKIgKypVmCdCh7pHeQYbASCKI3RzlsC3FPyopy0hTlAIvXJqjulPYBfRUI1w2FDRJzpEk3sw==}
     engines: {node: '>=18.17.0'}
     requiresBuild: true
     peerDependencies:
@@ -2133,6 +2182,17 @@ packages:
     resolution: {integrity: sha512-zTwEpWOzZ2CiKcB93BLngUX59hQkuZjT2+SAQEscSm52peDW/getsawMcWF1rGRpMCX6D7nSJA3CzJ8gn13N/g==}
     dependencies:
       tslib: 2.6.2
+    dev: false
+
+  /@hono/clerk-auth@2.0.0(@clerk/backend@1.1.2)(hono@4.2.6):
+    resolution: {integrity: sha512-ad+U8jDlBPgXBTv8BRnPrSFC/uX8U0ojiCR77I3WWHm5I9L3/bHsZpQ2lgvLTV3YbJyVmAdKJArEAQiPjodGdA==}
+    engines: {node: '>=16.x.x'}
+    peerDependencies:
+      '@clerk/backend': ^1.0.0
+      hono: '>=3.*'
+    dependencies:
+      '@clerk/backend': 1.1.2(react-dom@18.2.0)(react@18.2.0)
+      hono: 4.2.6
     dev: false
 
   /@humanwhocodes/config-array@0.11.14:
@@ -4787,6 +4847,24 @@ packages:
     dependencies:
       '@sinonjs/commons': 3.0.0
     dev: true
+
+  /@stripe/react-stripe-js@2.7.1(@stripe/stripe-js@3.4.0)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-/i13alp27HaSBbMM6kW0jhy8KqdtOL1T/EcRjFjfhvt+CBtMEg8TD7y28W3oZG0+OBDdCyGGnXgNgrKPYQH40g==}
+    peerDependencies:
+      '@stripe/stripe-js': ^1.44.1 || ^2.0.0 || ^3.0.0
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      '@stripe/stripe-js': 3.4.0
+      prop-types: 15.8.1
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /@stripe/stripe-js@3.4.0:
+    resolution: {integrity: sha512-a2kUP7OrsV0SSIk3UxWa+cnrW+PPIyuCbWIBH8vxfHIqmyeQN/d0lsplZJ2h7MlLsU/sB3EyhNBkhLLT+zHwKw==}
+    engines: {node: '>=12.16'}
+    dev: false
 
   /@svgr/babel-plugin-add-jsx-attribute@8.0.0(@babel/core@7.23.7):
     resolution: {integrity: sha512-b9MIk7yhdS1pMCZM8VeNfUlSKVRhsHZNMl5O9SfaX0l0t5wjdgu4IDzGB8bpnGBBOjGST3rRFVsaaEtI4W6f7g==}
@@ -13915,6 +13993,14 @@ packages:
   /strip-json-comments@3.1.1:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
+
+  /stripe@15.5.0:
+    resolution: {integrity: sha512-c04ToET4ZUzoeSh2rWarXCPNa2+6YzkwNAcWaT4axYRlN/u1XMkz9+inouNsXWjeT6ttBrp1twz10x/sCbWLpQ==}
+    engines: {node: '>=12.*'}
+    dependencies:
+      '@types/node': 18.16.9
+      qs: 6.11.2
+    dev: false
 
   /strong-log-transformer@2.1.0:
     resolution: {integrity: sha512-B3Hgul+z0L9a236FAUC9iZsL+nVHgoCJnqCbN588DjYxvGXaXaaFbfmQ/JhvKjZwsOukuR72XbHv71Qkug0HxA==}

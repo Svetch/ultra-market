@@ -19,6 +19,7 @@ interface Actions {
   openCart: () => void;
   closeCart: () => void;
   updateProductQuantity: (Item: Product, quantity: number) => void;
+  emptyCart: () => void;
 }
 
 // Initialize a default state
@@ -117,6 +118,9 @@ export const useCartStore = create(
             );
           }, 0),
         }));
+      },
+      emptyCart: () => {
+        set(INITIAL_STATE);
       },
     }),
     {

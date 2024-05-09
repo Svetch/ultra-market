@@ -2,7 +2,9 @@ import { PrismaClient } from '@prisma/client';
 import { Hono } from 'hono';
 import { handle } from 'hono/vercel';
 import { createDbConnection } from './db';
-
+import { clerkMiddleware } from '@hono/clerk-auth';
+import Stripe from 'stripe';
+import { formatAmountForStripe } from '../../../utils/stripe-helpers';
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
@@ -12,11 +14,17 @@ type Environment = {
 
 const app = new Hono<{ Bindings: Environment }>().basePath('/api');
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  typescript: true,
+  apiVersion: '2024-04-10',
+});
+
 //init prisma
 app.use(async (ctx, next) => {
   ctx.env.DB = createDbConnection;
   await next();
 });
+app.use('*', clerkMiddleware());
 
 app.get('/search', async (ctx, e) => {
   //wait for 10 seconds
@@ -86,6 +94,7 @@ app.get('/search', async (ctx, e) => {
       }),
     },
   });
+  console.log(items);
 
   return ctx.json(paginate({ take: 10 }, items));
 });
@@ -126,6 +135,308 @@ app.get('/item/:id', async (ctx) => {
           name: true,
           id: true,
         },
+      },
+    },
+  });
+
+  return ctx.json(item);
+});
+
+app.get('/organization/:id/item', async (ctx) => {
+  const DB = ctx.env.DB();
+  const id = ctx.req.param('id');
+  const auth = ctx.get('clerkAuth');
+  if (!id || auth?.orgId !== ctx.req.param('id'))
+    return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const items = await DB.shopItem.findMany({
+    where: {
+      organizationId: id,
+    },
+    select: {
+      id: true,
+      name: true,
+      price: true,
+      images: true,
+      description: true,
+      categories: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
+    },
+  });
+
+  return ctx.json(items);
+});
+
+app.patch('/organization/:id/item/:itemId', async (ctx) => {
+  const DB = ctx.env.DB();
+  const id = parseInt(ctx.req.param('id'));
+  const itemId = parseInt(ctx.req.param('itemId'));
+  const auth = ctx.get('clerkAuth');
+  if (auth?.orgId !== ctx.req.param('id'))
+    return ctx.json({ error: 'Unauthorized' }, 401);
+  if (isNaN(id)) return ctx.json({ error: 'Invalid id' }, 400);
+
+  const body = await ctx.req.json();
+  const item = await DB.shopItem.update({
+    where: {
+      id: itemId,
+    },
+    data: {
+      name: body.name,
+      price: body.price,
+      description: body.description,
+      images: body.images,
+      categories: {
+        set: body.categories.map((id: number) => ({
+          id,
+        })),
+      },
+    },
+  });
+
+  return ctx.json(item);
+});
+
+app.post('/checkout_sessions', async (ctx) => {
+  const DB = ctx.env.DB();
+  const body = await ctx.req.json();
+  const auth = ctx.get('clerkAuth');
+  if (!auth || auth?.userId === null) {
+    return ctx.json({ error: 'Unauthorized' }, 401);
+  }
+
+  const items = await DB.shopItem.findMany({
+    where: {
+      id: {
+        in: body.items.map((item: { id: number }) => item.id),
+      },
+    },
+  });
+  const params: Stripe.Checkout.SessionCreateParams = {
+    submit_type: 'pay',
+    mode: 'payment',
+    line_items: items.map((item) => {
+      return {
+        price_data: {
+          currency: 'HUF',
+          product_data: {
+            name: item.name,
+            images: item.images,
+            description: item.description,
+            metadata: {
+              id: item.id,
+            },
+          },
+          unit_amount: formatAmountForStripe(item.price, 'HUF'),
+        },
+        quantity: body.items.find((i: any) => i.id === item.id)?.quantity || 1,
+      };
+    }),
+    shipping_address_collection: {
+      allowed_countries: ['HU'],
+    },
+    phone_number_collection: {
+      enabled: true,
+    },
+    success_url: `${ctx.req.header('origin')}/api/result/{CHECKOUT_SESSION_ID}`,
+    cancel_url: `${ctx.req.header('origin')}/api/result/{CHECKOUT_SESSION_ID}`,
+  };
+  const checkoutSession = await stripe.checkout.sessions.create(params);
+
+  const order = await DB.order.create({
+    data: {
+      orderStatus: 'WaitingForPayment',
+      paymentStatus: 'Pending',
+      id: checkoutSession.id,
+      user: {
+        connectOrCreate: {
+          where: {
+            id: auth.userId,
+          },
+          create: {
+            id: auth.userId,
+            ...(auth.orgId
+              ? {
+                  Organization: {
+                    connectOrCreate: {
+                      where: {
+                        id: auth.orgId,
+                        ownerId: auth.userId,
+                      },
+                      create: {
+                        id: auth.orgId,
+                      },
+                    },
+                  },
+                }
+              : {
+                  Organization: {},
+                }),
+          },
+        },
+      },
+      items: {
+        connect: items.map((item) => ({ id: item.id })),
+      },
+    },
+  });
+
+  return ctx.json(checkoutSession);
+});
+
+app.get('/result/:id', async (ctx) => {
+  const DB = ctx.env.DB();
+  const auth = ctx.get('clerkAuth');
+  if (!auth || auth?.userId === null) {
+    return ctx.json({ error: 'Unauthorized' }, 401);
+  }
+  const session = await stripe.checkout.sessions.retrieve(ctx.req.param('id'));
+  const order = await DB.order.update({
+    where: {
+      id: session.id,
+    },
+    data: {
+      paymentStatus: session.payment_status === 'paid' ? 'Payed' : 'Canceled',
+      orderStatus: session.payment_status === 'paid' ? 'Pending' : 'Canceled',
+      address:
+        session.shipping_details?.address?.line1 +
+        '' +
+        session.shipping_details?.address?.line2,
+      city: session.shipping_details?.address?.city,
+      country: session.shipping_details?.address?.country,
+      phone: session.shipping_details?.phone,
+      zip: session.shipping_details?.address?.postal_code,
+      name: session.shipping_details?.name,
+    },
+  });
+  if (session.status == 'open')
+    await stripe.checkout.sessions.expire(session.id);
+  return ctx.redirect(`/payment/${session.id}`);
+});
+
+app.get('/payment/:id', async (ctx) => {
+  const DB = ctx.env.DB();
+  const auth = ctx.get('clerkAuth');
+  if (!auth || auth?.userId === null) {
+    return ctx.json({ error: 'Unauthorized' }, 401);
+  }
+  /*   const payment = await DB.payment.findUnique({
+    where: {
+      id: ctx.req.param('id'),
+      order: {
+        userId: auth.userId,
+      },
+    },
+  }); */
+  const payment = await stripe.checkout.sessions.retrieve(ctx.req.param('id'), {
+    expand: ['line_items', 'line_items.data.price.product'],
+  });
+  if (!payment) return ctx.json({ error: 'Not found' }, 404);
+  return ctx.json(payment);
+});
+
+app.get('/price-range', async (ctx) => {
+  const DB = ctx.env.DB();
+  const minPrice = await DB.shopItem.findFirst({
+    select: {
+      price: true,
+    },
+    take: 1,
+    orderBy: {
+      price: 'asc',
+    },
+  });
+
+  const maxPrice = await DB.shopItem.findFirst({
+    select: {
+      price: true,
+    },
+    take: 1,
+    orderBy: {
+      price: 'desc',
+    },
+  });
+
+  return ctx.json({
+    min: minPrice?.price || 0,
+    max: maxPrice?.price || 10_000,
+  });
+});
+
+app.get('/me/orders', async (ctx) => {
+  const DB = ctx.env.DB();
+  const auth = ctx.get('clerkAuth');
+  if (!auth || auth?.userId === null) {
+    return ctx.json({ error: 'Unauthorized' }, 401);
+  }
+  const orders = await Promise.all(
+    (
+      await DB.order.findMany({
+        where: {
+          userId: auth.userId,
+        },
+        select: { id: true },
+      })
+    ).map(
+      async (order) =>
+        await stripe.checkout.sessions.retrieve(order.id, {
+          expand: ['line_items', 'line_items.data.price.product'],
+        })
+    )
+  );
+  return ctx.json(orders);
+});
+
+app.post('/item', async (ctx) => {
+  const DB = ctx.env.DB();
+  const auth = ctx.get('clerkAuth');
+  if (!auth || !auth?.userId || !auth.orgId) {
+    return ctx.json({ error: 'Unauthorized' }, 401);
+  }
+  const body = await ctx.req.json();
+  console.log(body);
+
+  const item = await DB.shopItem.create({
+    data: {
+      name: body.name,
+      price: body.price,
+      description: body.description,
+      images: body.images,
+      organization: {
+        connectOrCreate: {
+          where: {
+            id: auth.orgId,
+          },
+          create: {
+            id: auth.orgId,
+            owner: {
+              connectOrCreate: {
+                where: {
+                  id: auth.userId,
+                },
+                create: {
+                  id: auth.userId,
+                },
+              },
+            },
+          },
+        },
+      },
+      shortDescription: body.shortDescription,
+      stock: body.stock,
+      categories: {
+        connectOrCreate: body.categories.map((name: string) => ({
+          where: {
+            name,
+          },
+          create: {
+            name,
+          },
+        })),
       },
     },
   });

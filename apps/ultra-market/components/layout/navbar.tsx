@@ -1,5 +1,5 @@
 'use client';
-import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs';
+import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
 import {
   CalendarIcon,
   EnvelopeClosedIcon,
@@ -30,12 +30,16 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@ultra-market/ui/sheet';
-import { Menu, Minus, Plus, Search, Trash, Trash2 } from 'lucide-react';
+import { Menu, Minus, Plus, Search, Trash2 } from 'lucide-react';
 import Image, { StaticImageData } from 'next/image';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import Stripe from 'stripe';
 import { Product } from '../../types';
+import getStripe from '../../utils/get-stripe';
 import { useCartStore } from '../cart';
+import { UserDropdownButton } from '../user-button';
 interface NavItem {
   children?: React.ReactNode;
   href: string;
@@ -67,11 +71,44 @@ const Navbar: React.FC<NavbarProps> = ({ items, logo }) => {
     removeOneFromCart,
     totalPrice,
     totalItems,
+    emptyCart,
   } = useCartStore();
 
   useEffect(() => {
     setCartState(cart);
   }, [cart]);
+
+  const handleCheckout = async (e: FormEvent) => {
+    e.preventDefault();
+    const checkoutSession: Stripe.Checkout.Session = await (
+      await fetch('/api/checkout_sessions', {
+        method: 'POST',
+        body: JSON.stringify({ items: cart }),
+      })
+    ).json();
+
+    if ((checkoutSession as any).statusCode === 500) {
+      console.error((checkoutSession as any).message);
+      return;
+    }
+
+    // Redirect to Checkout.
+    const stripe = await getStripe();
+    emptyCart();
+    const { error } = await stripe!.redirectToCheckout({
+      // Make the id field from the Checkout Session creation API response
+      // available to this file, so you can provide it as parameter here
+      // instead of the {{CHECKOUT_SESSION_ID}} placeholder.
+      sessionId: checkoutSession.id,
+    });
+    // If `redirectToCheckout` fails due to a browser or network
+    // error, display the localized error message to your customer
+    // using `error.message`.
+    if (error) {
+      toast('Sikertelen fizetés!', { description: error.message });
+      console.warn(error.message);
+    }
+  };
 
   return (
     <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 z-10">
@@ -190,91 +227,96 @@ const Navbar: React.FC<NavbarProps> = ({ items, logo }) => {
             </Button>
           </SheetTrigger>
           <SheetContent className="flex flex-col">
-            <SheetHeader>
-              <SheetTitle>Bevásárlókosár</SheetTitle>
-            </SheetHeader>
-            <div className="flex flex-col gap-4 overflow-y-auto flex-grow">
-              {cartState &&
-                cartState.map((product, index) => (
-                  <div key={index} className="flex flex-row items-center gap-4">
-                    <div className="hidden sm:block">
-                      <Image
-                        alt="Product image"
-                        className="aspect-square rounded-md object-cover"
-                        height="64"
-                        src={product.images[0]}
-                        width="64"
-                      />
-                    </div>
-                    <div className="flex flex-col w-full">
-                      <div className="flex flex-row gap-4 items-center">
-                        <span className="font-medium">{product.name}</span>
-                        <div className="ml-auto mr-4 p-1 flex flex-row">
+            <form onSubmit={handleCheckout}>
+              <SheetHeader>
+                <SheetTitle>Bevásárlókosár</SheetTitle>
+              </SheetHeader>
+              <div className="flex flex-col gap-4 overflow-y-auto flex-grow">
+                {cartState &&
+                  cartState.map((product, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-row items-center gap-4"
+                    >
+                      <div className="hidden sm:block">
+                        <Image
+                          alt="Product image"
+                          className="aspect-square rounded-md object-cover"
+                          height="64"
+                          src={product.images[0]}
+                          width="64"
+                        />
+                      </div>
+                      <div className="flex flex-col w-full">
+                        <div className="flex flex-row gap-4 items-center">
+                          <span className="font-medium">{product.name}</span>
+                          <div className="ml-auto mr-4 p-1 flex flex-row">
+                            <Button
+                              className="p-1 h-auto"
+                              onClick={() => removeOneFromCart(product)}
+                            >
+                              <Minus className="h-4 w-4" />
+                            </Button>
+                            <Input
+                              value={product.quantity}
+                              className="p-1 w-10 h-auto text-center"
+                              onChange={(e) => {
+                                let value = parseInt(e.target.value);
+                                if (isNaN(value)) {
+                                  return;
+                                }
+                                if (value < 1) {
+                                  value = 1;
+                                }
+                                updateProductQuantity(product, value);
+                              }}
+                            ></Input>
+                            <Button
+                              onClick={() => addToCart(product)}
+                              className="p-1 h-auto"
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="flex flex-row gap-4 items-center">
+                          <span>{product.price} Ft</span>
                           <Button
-                            className="p-1 h-auto"
-                            onClick={() => removeOneFromCart(product)}
-                          >
-                            <Minus className="h-4 w-4" />
-                          </Button>
-                          <Input
-                            value={product.quantity}
-                            className="p-1 w-10 h-auto text-center"
-                            onChange={(e) => {
-                              let value = parseInt(e.target.value);
-                              if (isNaN(value)) {
-                                return;
-                              }
-                              if (value < 1) {
-                                value = 1;
-                              }
-                              updateProductQuantity(product, value);
+                            className="ml-auto mr-4 bg-transparent p-1 h-auto border-transparent text-white hover:text-red-600 hover:bg-transparent border-2 hover:border-destructive"
+                            onClick={() => {
+                              removeFromCart(product);
                             }}
-                          ></Input>
-                          <Button
-                            onClick={() => addToCart(product)}
-                            className="p-1 h-auto"
                           >
-                            <Plus className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
-                      <div className="flex flex-row gap-4 items-center">
-                        <span>{product.price} Ft</span>
-                        <Button
-                          className="ml-auto mr-4 bg-transparent p-1 h-auto border-transparent text-white hover:text-red-600 hover:bg-transparent border-2 hover:border-destructive"
-                          onClick={() => {
-                            removeFromCart(product);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
 
-              {!cartState.length && 'Üres a kosarad'}
-            </div>
-            {cartState && (
-              <>
-                <Separator />
-                <div className="flex flex-row">
-                  <span>Összesen</span>
-                  <span className="ml-auto">
-                    {formatter.format(totalPrice)}
-                  </span>
-                </div>
-              </>
-            )}
-            <SheetFooter className="mt-4">
-              <SheetClose asChild>
-                <Button type="submit">Fizetés</Button>
-              </SheetClose>
-            </SheetFooter>
+                {!cartState.length && 'Üres a kosarad'}
+              </div>
+              {cartState && (
+                <>
+                  <Separator />
+                  <div className="flex flex-row">
+                    <span>Összesen</span>
+                    <span className="ml-auto">
+                      {formatter.format(totalPrice)}
+                    </span>
+                  </div>
+                </>
+              )}
+              <SheetFooter className="mt-4">
+                <SheetClose asChild>
+                  <Button type="submit">Fizetés</Button>
+                </SheetClose>
+              </SheetFooter>
+            </form>
           </SheetContent>
         </Sheet>
         <SignedIn>
-          <UserButton />
+          <UserDropdownButton />
         </SignedIn>
         <SignedOut>
           <SignInButton>Bejeletkezés</SignInButton>

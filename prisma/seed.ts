@@ -9,9 +9,9 @@ async function main() {
     new Array(10).fill(0).map((_, i) => {
       return prisma.user.upsert({
         update: {},
-        where: { id: i + 1 },
+        where: { id: (i + 1).toString() },
         create: {
-          id: i + 1,
+          id: (i + 1).toString(),
         },
       });
     })
@@ -21,7 +21,7 @@ async function main() {
     new Array(10).fill(0).map((_, i) => {
       return prisma.organization.upsert({
         update: {},
-        where: { id: i + 1 },
+        where: { id: (i + 1).toString() },
         create: {
           name: faker.company.name(),
           logo: faker.image.url(),
@@ -29,6 +29,7 @@ async function main() {
           phone: faker.phone.number(),
           vat: faker.number.int().toString(),
           ownerId: users[i].id,
+          id: (i + 1).toString(),
         },
       });
     })
@@ -41,7 +42,7 @@ async function main() {
       create: {
         id: i,
         name: faker.commerce.productName(),
-        price: parseInt(faker.commerce.price()),
+        price: parseInt(faker.commerce.price()) * 10,
         images: [faker.image.url()],
         description: faker.commerce.productDescription(),
         organizationId: orgs[faker.number.int(orgs.length - 1)].id,

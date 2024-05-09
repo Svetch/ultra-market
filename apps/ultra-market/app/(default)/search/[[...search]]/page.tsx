@@ -24,7 +24,7 @@ export default function Index({ params }: { params: { search: string[] } }) {
     category: searchParams.get('category')?.split(',') || [],
     price: {
       min: parseInt(searchParams.get('price')?.split(',')[0] || '0'),
-      max: parseInt(searchParams.get('price')?.split(',')[1] || '3000'),
+      max: parseInt(searchParams.get('price')?.split(',')[1] || '30000'),
     },
   });
   const { ref, inView } = useInView();
@@ -184,7 +184,7 @@ export default function Index({ params }: { params: { search: string[] } }) {
             <PriceControl
               name="price"
               defaultValue={[search.price.min, search.price.max]}
-              max={3000}
+              max={30000}
             />
           </div>
         </form>
