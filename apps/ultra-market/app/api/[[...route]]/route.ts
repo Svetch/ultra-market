@@ -1,11 +1,11 @@
+import { clerkMiddleware } from '@hono/clerk-auth';
 import { PrismaClient } from '@prisma/client';
 import { Hono } from 'hono';
-import { createDbConnection } from './db';
-import { clerkMiddleware } from '@hono/clerk-auth';
+import { FetchEventLike } from 'hono/types';
 import Stripe from 'stripe';
 import { formatAmountForStripe } from '../../../utils/stripe-helpers';
-import { NextRequest } from 'next/server';
-import { FetchEventLike } from 'hono/types';
+import { createDbConnection } from './db';
+
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +19,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   typescript: true,
   apiVersion: '2024-04-10',
 });
+
 
 //init prisma
 app.use(async (ctx, next) => {
