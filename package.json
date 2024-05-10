@@ -45,7 +45,7 @@
     "framer-motion": "^11.1.9",
     "hono": "^4.2.6",
     "lucide-react": "^0.343.0",
-    "next": "14.2.2",
+    "next": "14.2.3",
     "next-intl": "^3.13.0",
     "next-themes": "^0.3.0",
     "pg": "^8.11.5",
